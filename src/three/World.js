@@ -9,35 +9,36 @@ export default class World {
     this.character = null;
     this.modelGroup = new THREE.Group();
 
-    this.addLights();
+    this.mouse = {
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0,
+    };
+
+    this.setupMouse();
     this.loadCharacter();
   }
 
-  addLights() {
-    const ambientLight = new THREE.AmbientLight(
-      0xffffff,
-      2
-    );
+  setupMouse() {
+    const hero = document.querySelector("#custom-three-hero");
 
-    this.scene.add(ambientLight);
+    if (!hero) return;
 
-    const frontLight = new THREE.DirectionalLight(
-      0xffffff,
-      3
-    );
+    hero.addEventListener("mousemove", (event) => {
+      const rect = hero.getBoundingClientRect();
 
-    frontLight.position.set(5, 5, 10);
+      this.mouse.targetX =
+        ((event.clientX - rect.left) / rect.width) * 2 - 1;
 
-    this.scene.add(frontLight);
+      this.mouse.targetY =
+        -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    });
 
-    const sideLight = new THREE.DirectionalLight(
-      0xffffff,
-      2
-    );
-
-    sideLight.position.set(-5, 2, 5);
-
-    this.scene.add(sideLight);
+    hero.addEventListener("mouseleave", () => {
+      this.mouse.targetX = 0;
+      this.mouse.targetY = 0;
+    });
   }
 
   loadCharacter() {
@@ -46,20 +47,28 @@ export default class World {
     const modelUrl =
       `${window.CTH_DATA.pluginUrl}dist/models/character.glb`;
 
-    console.log("Loading model from:", modelUrl);
+    console.log("Loading character:", modelUrl);
 
     loader.load(
       modelUrl,
 
       (gltf) => {
-        console.log("MODEL LOADED SUCCESSFULLY:", gltf);
+        console.log("MODEL LOADED SUCCESSFULLY", gltf);
 
         this.character = gltf.scene;
 
         /*
-        ==============================
-        GET ORIGINAL MODEL SIZE
-        ==============================
+        --------------------------------
+        DON'T FORCE ROTATION YET
+        --------------------------------
+        */
+
+        this.character.rotation.set(0, 0, 0);
+
+        /*
+        --------------------------------
+        CALCULATE ORIGINAL MODEL SIZE
+        --------------------------------
         */
 
         const box = new THREE.Box3().setFromObject(
@@ -67,18 +76,30 @@ export default class World {
         );
 
         const size = new THREE.Vector3();
+
         box.getSize(size);
 
         const center = new THREE.Vector3();
+
         box.getCenter(center);
 
-        console.log("ORIGINAL MODEL SIZE:", size);
-        console.log("ORIGINAL MODEL CENTER:", center);
+        console.log("MODEL SIZE:", size);
+        console.log("MODEL CENTER:", center);
 
         /*
-        ==============================
-        NORMALIZE MODEL SIZE
-        ==============================
+        --------------------------------
+        CENTER THE MODEL
+        --------------------------------
+        */
+
+        this.character.position.x = -center.x;
+        this.character.position.y = -center.y;
+        this.character.position.z = -center.z;
+
+        /*
+        --------------------------------
+        AUTOMATIC SCALE
+        --------------------------------
         */
 
         const maxDimension = Math.max(
@@ -87,76 +108,109 @@ export default class World {
           size.z
         );
 
-        const desiredSize = 4;
+        const desiredSize = 5;
 
         const scale = desiredSize / maxDimension;
 
         this.character.scale.setScalar(scale);
 
         /*
-        ==============================
-        RECALCULATE AFTER SCALING
-        ==============================
+        --------------------------------
+        PRESERVE MATERIALS AND COLORS
+        --------------------------------
         */
 
-        const scaledBox = new THREE.Box3()
-          .setFromObject(this.character);
+        this.character.traverse((child) => {
+  if (!child.isMesh) return;
 
-        const scaledCenter = new THREE.Vector3();
+  const oldMaterial = child.material;
 
-        scaledBox.getCenter(scaledCenter);
+  // Handle single or multiple materials
+  const materials = Array.isArray(oldMaterial)
+    ? oldMaterial
+    : [oldMaterial];
+
+  const newMaterials = materials.map((material) => {
+
+    // Get the original texture from GLB
+    const texture = material.map || null;
+
+    if (texture) {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.needsUpdate = true;
+    }
+
+    // Use unlit material so original colors stay visible
+    return new THREE.MeshBasicMaterial({
+      map: texture,
+      color: 0xffffff,
+      transparent: true,
+      side: THREE.DoubleSide,
+      alphaTest: 0.01
+    });
+  });
+
+  // Apply material
+  child.material = Array.isArray(oldMaterial)
+    ? newMaterials
+    : newMaterials[0];
+});
 
         /*
-        Move model so its center
-        is at the origin
-        */
-
-        this.character.position.sub(scaledCenter);
-
-        /*
-        ==============================
-        ADD TO GROUP
-        ==============================
+        --------------------------------
+        ADD CHARACTER
+        --------------------------------
         */
 
         this.modelGroup.add(this.character);
 
-        this.modelGroup.position.set(
-          0,
-          0,
-          0
-        );
+        this.modelGroup.position.set(0, 0, 0);
 
         this.scene.add(this.modelGroup);
 
-        console.log(
-          "FINAL MODEL SIZE:",
-          new THREE.Box3()
-            .setFromObject(this.modelGroup)
-            .getSize(new THREE.Vector3())
-        );
-
-        /*
-        TEMPORARY HELPER
-        */
-
-        const axesHelper = new THREE.AxesHelper(3);
-
-        this.scene.add(axesHelper);
+        console.log("CHARACTER ADDED TO SCENE");
       },
 
       undefined,
 
       (error) => {
-        console.error(
-          "GLB LOADING ERROR:",
-          error
-        );
+        console.error("GLB LOADING ERROR:", error);
       }
     );
   }
 
-  handleClick() {}
+  update() {
+  if (!this.modelGroup) return;
 
-  update() {}
+  // FAST + SMOOTH mouse interpolation
+  const smoothSpeed = 0.28;
+
+  this.mouse.x +=
+    (this.mouse.targetX - this.mouse.x) * smoothSpeed;
+
+  this.mouse.y +=
+    (this.mouse.targetY - this.mouse.y) * smoothSpeed;
+
+  /*
+  CHARACTER MOVEMENT
+  Very small movement so it stays
+  mostly fixed in its original place
+  */
+
+  this.modelGroup.position.x =
+    this.mouse.x * 0.04;
+
+  this.modelGroup.position.y =
+    this.mouse.y * 0.025;
+
+  /*
+  FAST CHARACTER REACTION
+  */
+
+  this.modelGroup.rotation.y =
+    this.mouse.x * 0.18;
+
+  this.modelGroup.rotation.x =
+    -this.mouse.y * 0.10;
+}
 }

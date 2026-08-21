@@ -71,15 +71,29 @@ export default class Experience {
     this.renderer.resize();
   }
 
+  // tick() {
+  //   // const elapsedTime = this.clock.getElapsedTime();
+
+  //   this.world.update(elapsedTime);
+
+  //   this.renderer.render();
+
+  //   window.requestAnimationFrame(() => {
+  //     this.tick();
+  //   });
+  // }
+
   tick() {
-    const elapsedTime = this.clock.getElapsedTime();
+  this.world.update();
 
-    this.world.update(elapsedTime);
+  this.renderer.instance.render(
+    this.scene,
+    this.camera.instance
+  );
 
-    this.renderer.render();
+  requestAnimationFrame(() => {
+    this.tick();
+  });
+}
 
-    window.requestAnimationFrame(() => {
-      this.tick();
-    });
-  }
 }
