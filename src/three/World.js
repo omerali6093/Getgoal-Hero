@@ -3,22 +3,28 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 export default class World {
   constructor(experience) {
-    this.experience = experience;
-    this.scene = experience.scene;
+  this.experience = experience;
+  this.scene = experience.scene;
 
-    this.character = null;
-    this.modelGroup = new THREE.Group();
+  this.character = null;
+  this.modelGroup = new THREE.Group();
 
-    this.mouse = {
-      x: 0,
-      y: 0,
-      targetX: 0,
-      targetY: 0,
-    };
+  this.mouse = {
+    x: 0,
+    y: 0,
+    targetX: 0,
+    targetY: 0,
+  };
 
-    this.setupMouse();
-    this.loadCharacter();
-  }
+  // Initial character position
+  this.characterTargetX = 0;
+
+  // Track click state
+  this.isCharacterClicked = false;
+
+  this.setupMouse();
+  this.loadCharacter();
+}
 
   setupMouse() {
     const hero = document.querySelector("#custom-three-hero");
@@ -180,71 +186,103 @@ export default class World {
   }
 
   handleClick() {
-    const clickContent = document.querySelector(
-      ".cth-click-content"
-    );
+  // 
+  const hero = document.querySelector("#custom-three-hero");
 
-    if (!clickContent) {
-      console.error("Click content not found");
-      return;
-    }
-
-    // Toggle the content when character is clicked
-    clickContent.classList.toggle("active");
-
-    console.log("Character clicked!");
+  if (!hero) {
+    console.error("Custom Three Hero section not found");
+    return;
   }
 
+  const textContent = hero.querySelector(".cth-click-content");
 
-  update() {
+  console.log("CLICK CONTENT:", textContent);
+
+  if (!textContent) {
+    console.error("CLICK CONTENT NOT FOUND");
+    return;
+  }
+
+  textContent.classList.add("active");
+
+  this.characterTargetX = 2.4;
+
+  console.log("Character clicked successfully!");
+  //   "cth-click-content"
+  // );
+
+  // if (!textContent) {
+  //   console.error("Text content not found");
+  //   return;
+  // }
+
+  // // Prevent repeating the animation unnecessarily
+  // if (this.isCharacterClicked) return;
+
+  // this.isCharacterClicked = true;
+
+  // // Show text
+  // textContent.classList.add("active");
+
+  // // Smoothly move character to the right
+  // this.characterTargetX = 0.8;
+
+  // console.log("Character clicked - text shown");
+}
+
+update() {
     if (!this.modelGroup) return;
 
-    // =========================
-    // FAST + SMOOTH MOUSE INPUT
-    // =========================
-
+    // Smooth mouse movement
     const mouseSpeed = 0.35;
 
     this.mouse.x +=
-      (this.mouse.targetX - this.mouse.x) * mouseSpeed;
+        (this.mouse.targetX - this.mouse.x) * mouseSpeed;
 
     this.mouse.y +=
-      (this.mouse.targetY - this.mouse.y) * mouseSpeed;
+        (this.mouse.targetY - this.mouse.y) * mouseSpeed;
 
 
     // =========================
-    // WHOLE CHARACTER ROTATION
+    // CHARACTER ROTATION
     // =========================
 
+    // Strong left/right rotation
     const targetRotationY =
-      this.mouse.x * 0.45;
+        this.mouse.x * 0.5;
 
+    // Limited up/down rotation
     const targetRotationX =
-      -this.mouse.y * 0.15;
+        -this.mouse.y * 0.06;
 
-    // Smoothly rotate the whole character
+
     this.modelGroup.rotation.y +=
-      (targetRotationY - this.modelGroup.rotation.y) * 0.18;
+        (targetRotationY - this.modelGroup.rotation.y) * 0.18;
 
     this.modelGroup.rotation.x +=
-      (targetRotationX - this.modelGroup.rotation.x) * 0.18;
+        (targetRotationX - this.modelGroup.rotation.x) * 0.18;
 
 
     // =========================
-    // VERY SMALL MOVEMENT
-    // Character remains mostly fixed
+    // CHARACTER POSITION
     // =========================
 
+    // Character moves slightly left/right
     const targetX =
-      this.mouse.x * 0.12;
+        this.characterTargetX +
+        this.mouse.x * 0.08;
 
+    // Very limited vertical movement
     const targetY =
-      this.mouse.y * 0.06;
+        this.mouse.y * 0.025;
+
 
     this.modelGroup.position.x +=
-      (targetX - this.modelGroup.position.x) * 0.15;
+        (targetX - this.modelGroup.position.x) * 0.12;
 
     this.modelGroup.position.y +=
-      (targetY - this.modelGroup.position.y) * 0.15;
-  }
+        (targetY - this.modelGroup.position.y) * 0.15;
+}
+
+
 }
