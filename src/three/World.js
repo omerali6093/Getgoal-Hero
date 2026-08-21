@@ -108,7 +108,7 @@ export default class World {
           size.z
         );
 
-        const desiredSize = 5;
+        const desiredSize = 6;
 
         const scale = desiredSize / maxDimension;
 
@@ -121,40 +121,40 @@ export default class World {
         */
 
         this.character.traverse((child) => {
-  if (!child.isMesh) return;
+          if (!child.isMesh) return;
 
-  const oldMaterial = child.material;
+          const oldMaterial = child.material;
 
-  // Handle single or multiple materials
-  const materials = Array.isArray(oldMaterial)
-    ? oldMaterial
-    : [oldMaterial];
+          // Handle single or multiple materials
+          const materials = Array.isArray(oldMaterial)
+            ? oldMaterial
+            : [oldMaterial];
 
-  const newMaterials = materials.map((material) => {
+          const newMaterials = materials.map((material) => {
 
-    // Get the original texture from GLB
-    const texture = material.map || null;
+            // Get the original texture from GLB
+            const texture = material.map || null;
 
-    if (texture) {
-      texture.colorSpace = THREE.SRGBColorSpace;
-      texture.needsUpdate = true;
-    }
+            if (texture) {
+              texture.colorSpace = THREE.SRGBColorSpace;
+              texture.needsUpdate = true;
+            }
 
-    // Use unlit material so original colors stay visible
-    return new THREE.MeshBasicMaterial({
-      map: texture,
-      color: 0xffffff,
-      transparent: true,
-      side: THREE.DoubleSide,
-      alphaTest: 0.01
-    });
-  });
+            // Use unlit material so original colors stay visible
+            return new THREE.MeshBasicMaterial({
+              map: texture,
+              color: 0xffffff,
+              transparent: true,
+              side: THREE.DoubleSide,
+              alphaTest: 0.01
+            });
+          });
 
-  // Apply material
-  child.material = Array.isArray(oldMaterial)
-    ? newMaterials
-    : newMaterials[0];
-});
+          // Apply material
+          child.material = Array.isArray(oldMaterial)
+            ? newMaterials
+            : newMaterials[0];
+        });
 
         /*
         --------------------------------
@@ -179,38 +179,72 @@ export default class World {
     );
   }
 
+  handleClick() {
+    const clickContent = document.querySelector(
+      ".cth-click-content"
+    );
+
+    if (!clickContent) {
+      console.error("Click content not found");
+      return;
+    }
+
+    // Toggle the content when character is clicked
+    clickContent.classList.toggle("active");
+
+    console.log("Character clicked!");
+  }
+
+
   update() {
-  if (!this.modelGroup) return;
+    if (!this.modelGroup) return;
 
-  // FAST + SMOOTH mouse interpolation
-  const smoothSpeed = 0.28;
+    // =========================
+    // FAST + SMOOTH MOUSE INPUT
+    // =========================
 
-  this.mouse.x +=
-    (this.mouse.targetX - this.mouse.x) * smoothSpeed;
+    const mouseSpeed = 0.35;
 
-  this.mouse.y +=
-    (this.mouse.targetY - this.mouse.y) * smoothSpeed;
+    this.mouse.x +=
+      (this.mouse.targetX - this.mouse.x) * mouseSpeed;
 
-  /*
-  CHARACTER MOVEMENT
-  Very small movement so it stays
-  mostly fixed in its original place
-  */
+    this.mouse.y +=
+      (this.mouse.targetY - this.mouse.y) * mouseSpeed;
 
-  this.modelGroup.position.x =
-    this.mouse.x * 0.04;
 
-  this.modelGroup.position.y =
-    this.mouse.y * 0.025;
+    // =========================
+    // WHOLE CHARACTER ROTATION
+    // =========================
 
-  /*
-  FAST CHARACTER REACTION
-  */
+    const targetRotationY =
+      this.mouse.x * 0.45;
 
-  this.modelGroup.rotation.y =
-    this.mouse.x * 0.18;
+    const targetRotationX =
+      -this.mouse.y * 0.15;
 
-  this.modelGroup.rotation.x =
-    -this.mouse.y * 0.10;
-}
+    // Smoothly rotate the whole character
+    this.modelGroup.rotation.y +=
+      (targetRotationY - this.modelGroup.rotation.y) * 0.18;
+
+    this.modelGroup.rotation.x +=
+      (targetRotationX - this.modelGroup.rotation.x) * 0.18;
+
+
+    // =========================
+    // VERY SMALL MOVEMENT
+    // Character remains mostly fixed
+    // =========================
+
+    const targetX =
+      this.mouse.x * 0.12;
+
+    const targetY =
+      this.mouse.y * 0.06;
+
+    this.modelGroup.position.x +=
+      (targetX - this.modelGroup.position.x) * 0.15;
+
+    this.modelGroup.position.y +=
+      (targetY - this.modelGroup.position.y) * 0.15;
+  }
 }

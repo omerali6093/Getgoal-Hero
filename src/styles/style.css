@@ -35,6 +35,8 @@
 .cth-canvas {
     position: absolute;
 
+    /* border: 2px solid yellow; */
+    padding-top: 5em;
     inset: 0;
 
     width: 100%;
@@ -78,6 +80,7 @@
     position: relative;
 
     z-index: 5;
+
 
     width: min(600px, 90%);
 
@@ -294,6 +297,80 @@
 
     animation:
         cth-pulse 2s infinite;
+}
+
+/* =========================
+   CLICK CONTENT
+========================= */
+
+.cth-click-content {
+    position: absolute;
+    left: 8%;
+    bottom: 18%;
+
+    border: 2px solid yellow;
+
+    max-width: 700px;
+
+    margin-top: -5em;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(40px);
+
+    transition:
+        opacity 0.5s ease,
+        transform 0.5s ease,
+        visibility 0.5s ease;
+
+    pointer-events: none;
+
+    z-index: 10;
+}
+
+
+/* SHOW CONTENT */
+
+.cth-click-content.active {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+/* HELLO */
+
+.cth-click-content span {
+    display: inline-block;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    letter-spacing: 2px;
+
+    margin-bottom: 15px;
+}
+
+
+/* HEADING */
+
+.cth-click-content h2 {
+    margin: 0;
+
+    font-size: clamp(36px, 5vw, 72px);
+
+    line-height: 1.1;
+
+    font-weight: 500;
+}
+
+
+.cth-click-content h2 strong {
+    display: block;
+
+    font-weight: 700;
 }
 
 
