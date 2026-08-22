@@ -106,6 +106,10 @@ function cth_hero_shortcode() {
 
         <canvas class="cth-canvas"></canvas>
 
+        <div class="cth-head-text">
+        CLICK ME
+    </div>
+
         <div class="cth-background"></div>
 
 
@@ -148,17 +152,44 @@ function cth_hero_shortcode() {
 
         <div class="cth-click-content">
 
-            <span>HELLO 👋</span>
+            <!-- <h1>A MULTI-TECH AGENCY 
+            <span style="color: ">BUILT FOR</span> <span>WHAT’S NEXT</span></h1>
 
-            <h2>
-                Let's Create
-                <strong>Something Amazing.</strong>
-            </h2>
+            <h5>
+                We combine design, technology, marketing, and innovation to turn ideas into impactful digital experiences.
+            </h5> -->
+
+
+
+            <div class="cth-eyebrow">
+        <span class="cth-dot"></span>
+        Agency <span class="cth-rule"></span> Multi-Discipline
+    </div>
+
+    <h1>
+        A MULTI-TECH AGENCY
+        <br>
+        <span class="thin"> BUILT FOR <span class="accent">WHAT'S NEXT</span></span>
+    </h1>
+
+    <p>
+        We combine design, technology, marketing, and innovation to turn ideas into impactful digital experiences.
+    </p>
+
+    <div class="cth-modules">
+        <span class="cth-module">Design</span>
+        <span class="cth-module">Technology</span>
+        <span class="cth-module">Marketing</span>
+        <span class="cth-module">Innovation</span>
+    </div>
+
 
         </div>
 
+        
 
-        <div class="cth-interaction">
+
+        <!-- <div class="cth-interaction">
 
             <span class="cth-pulse"></span>
 
@@ -166,7 +197,7 @@ function cth_hero_shortcode() {
                 Move your mouse and click the character
             </span>
 
-        </div>
+        </div> -->
 
     </section>
 

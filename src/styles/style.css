@@ -1,6 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
 
 body {
     overflow-y: hidden;
+    font-family: "Nunito", sans-serif;
 }
 /* ===============================
    GLOBAL HERO
@@ -121,7 +124,151 @@ body {
 }
 
 
-.cth-content h1 {
+
+
+
+.cth-click-content h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size: 50px;
+
+    line-height: 0.95;
+
+    letter-spacing: 2px;
+}
+
+.cth-click-content h1 .thin {
+    /* display: block; */
+
+    color: rgba(255, 255, 255, 0.55);
+    font-size:38px;
+
+    font-weight: 400;
+}
+
+.cth-click-content h1 .accent {
+    color: #00c8ff;
+
+    font-weight: 400;
+    font-size: 40px;
+
+    position: relative;
+}
+
+.cth-content h1 .accent::after {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+
+    height: 3px;
+
+    background: linear-gradient(90deg, #00c8ff, transparent);
+
+    opacity: 0.6;
+}
+
+.cth-click-content p {
+    max-width: 400px;
+
+    margin-top: 10px;
+
+    color:
+        rgba(255, 255, 255, 0.7);
+
+    font-size: 17px;
+
+    line-height: 1.7;
+}
+
+/* eyebrow tag above the heading */
+.cth-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 22px;
+
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+
+    color: #00c8ff;
+}
+
+.cth-dot {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #00c8ff;
+    box-shadow: 0 0 8px 2px rgba(0, 200, 255, 0.25);
+
+    animation: cth-blink 1.6s ease-in-out infinite;
+}
+
+.cth-rule {
+    width: 34px;
+    height: 1px;
+
+    background: rgba(255, 255, 255, 0.15);
+}
+
+@keyframes cth-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+}
+
+/* service tags below the paragraph */
+.cth-modules {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 28px;
+}
+
+.cth-module {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 8px 14px;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+
+    background: rgba(255, 255, 255, 0.03);
+
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+
+    color: #fff;
+}
+
+.cth-module::before {
+    content: "";
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #00c8ff;
+
+    flex-shrink: 0;
+}
+
+
+
+/* .cth-content h1 {
     margin: 0;
 
     font-size:
@@ -134,10 +281,10 @@ body {
     line-height: 0.95;
 
     letter-spacing: -3px;
-}
+} */
 
 
-.cth-content h1 span {
+/* .cth-content h1 span {
     display: block;
 
     color: #00c8ff;
@@ -155,7 +302,7 @@ body {
     font-size: 17px;
 
     line-height: 1.7;
-}
+} */
 
 
 /* ===============================
@@ -396,6 +543,71 @@ body {
         box-shadow:
             0 0 0 0
             rgba(0, 200, 255, 0);
+    }
+
+}
+
+/* ===============================
+   3D CHARACTER HEAD TEXT
+================================ */
+
+.cth-head-text {
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    z-index: 20;
+
+    color: #00c8ff;
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    letter-spacing: 3px;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+
+    /* transform:
+        translate(-50%, -50%); */
+
+    opacity: 1;
+
+    transition:
+        opacity 0.4s ease;
+
+    animation:
+        cth-head-text-pulse 1.5s ease-in-out infinite;
+}
+
+
+/* Hide after character click */
+
+.cth-head-text.hide {
+    opacity: 0;
+}
+
+
+/* Simple text animation */
+
+@keyframes cth-head-text-pulse {
+
+    0%,
+    100% {
+        opacity: 0.45;
+        transform:
+            translate(-50%, -50%)
+            scale(0.95);
+    }
+
+    50% {
+        opacity: 1;
+        transform:
+            translate(-50%, -50%)
+            scale(1.08);
     }
 
 }
