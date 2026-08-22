@@ -531,6 +531,13 @@ export default class World {
       targetY: 0,
     };
 
+    this.device = {
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0,
+    };
+
     // Initial character position
     this.characterTargetX = 0;
     this.characterBaseY = -0.65;
@@ -551,6 +558,7 @@ export default class World {
 
 
     this.setupMouse();
+    this.setupDeviceOrientation();
     this.loadCharacter();
   }
 
@@ -575,6 +583,124 @@ export default class World {
     });
   }
 
+  setupDeviceOrientation() {
+
+    // Only run on mobile/tablet devices
+    if (!window.matchMedia("(max-width: 767px)").matches) {
+      return;
+    }
+
+
+    const enableOrientation = () => {
+
+      window.addEventListener(
+        "deviceorientation",
+        (event) => {
+
+          /*
+          gamma:
+          Phone tilted LEFT / RIGHT
+
+          beta:
+          Phone tilted FORWARD / BACKWARD
+          */
+
+
+          // LEFT / RIGHT
+          const gamma = event.gamma || 0;
+
+          // TOP / BOTTOM
+          const beta = event.beta || 0;
+
+
+          /*
+          Normalize values.
+
+          gamma normally:
+          -90 to +90
+
+          beta normally:
+          -180 to +180
+          */
+
+
+          this.device.targetX =
+            THREE.MathUtils.clamp(
+              gamma / 35,
+              -1,
+              1
+            );
+
+
+          this.device.targetY =
+            THREE.MathUtils.clamp(
+              (beta - 45) / 35,
+              -1,
+              1
+            );
+
+        },
+        true
+      );
+
+    };
+
+
+    /*
+    iPhone / iPad permission
+    */
+
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function"
+    ) {
+
+      // Permission must be requested
+      // after a user interaction
+
+      const requestPermission = () => {
+
+        DeviceOrientationEvent
+          .requestPermission()
+          .then((response) => {
+
+            if (response === "granted") {
+              enableOrientation();
+            }
+
+          })
+          .catch((error) => {
+
+            console.error(
+              "Device orientation permission error:",
+              error
+            );
+
+          });
+
+
+        // Run only once
+        document.removeEventListener(
+          "click",
+          requestPermission
+        );
+
+      };
+
+
+      document.addEventListener(
+        "click",
+        requestPermission
+      );
+
+    } else {
+
+      // Android and other supported devices
+      enableOrientation();
+
+    }
+  }
+
   loadCharacter() {
     const loader = new GLTFLoader();
 
@@ -583,7 +709,7 @@ export default class World {
 
 
     const modelUrl = window.CTH_DATA.pluginUrl +
-    "dist/models/character.glb";
+      "dist/models/character.glb";
 
     console.log("Loading character:", modelUrl);
 
@@ -646,7 +772,9 @@ export default class World {
           size.z
         );
 
-        const desiredSize = 7;
+        const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+        const desiredSize = isMobile ? 5 : 7;
 
         const scale = desiredSize / maxDimension;
 
@@ -737,10 +865,10 @@ export default class World {
   }
 
 
- handleClick() {
+  handleClick() {
 
     const hero = document.querySelector(
-        "#custom-three-hero"
+      "#custom-three-hero"
     );
 
     if (!hero) return;
@@ -749,12 +877,12 @@ export default class World {
 
 
     const textContent =
-        hero.querySelector(".cth-click-content");
+      hero.querySelector(".cth-click-content");
 
 
     if (!textContent) {
-        console.error("CLICK CONTENT NOT FOUND");
-        return;
+      console.error("CLICK CONTENT NOT FOUND");
+      return;
     }
 
 
@@ -771,13 +899,13 @@ export default class World {
 
     if (this.headText) {
 
-        this.headText.style.opacity = "0";
+      this.headText.style.opacity = "0";
 
-        this.headText.style.visibility =
-            "hidden";
+      this.headText.style.visibility =
+        "hidden";
 
-        this.headText.style.pointerEvents =
-            "none";
+      this.headText.style.pointerEvents =
+        "none";
     }
 
 
@@ -796,7 +924,7 @@ export default class World {
 
 
     console.log("Character clicked successfully");
-}
+  }
 
   // =====================================
   // NEW: UPDATE HEAD TEXT POSITION
@@ -804,103 +932,103 @@ export default class World {
 
   updateHeadText() {
 
-  if (
-    !this.headText ||
-    !this.character ||
-    !this.experience.camera
-  ) {
-    return;
-  }
+    if (
+      !this.headText ||
+      !this.character ||
+      !this.experience.camera
+    ) {
+      return;
+    }
 
-  this.scene.updateMatrixWorld(true);
-
-
-  // =====================================
-  // CREATE FIXED HEAD ANCHOR ONCE
-  // =====================================
-
-  if (!this.headAnchor) {
-
-    const box = new THREE.Box3()
-      .setFromObject(this.character);
-
-    const size = new THREE.Vector3();
-    box.getSize(size);
-
-    const center = new THREE.Vector3();
-    box.getCenter(center);
+    this.scene.updateMatrixWorld(true);
 
 
-    /*
-    Fixed LOCAL position on the head.
+    // =====================================
+    // CREATE FIXED HEAD ANCHOR ONCE
+    // =====================================
 
-    This is created once and stays
-    attached to the character.
-    */
+    if (!this.headAnchor) {
 
-    const worldHeadPosition = new THREE.Vector3(
-      center.x,
-      box.max.y - size.y * 0.26,
-      box.max.z + 0.05
+      const box = new THREE.Box3()
+        .setFromObject(this.character);
+
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+
+      /*
+      Fixed LOCAL position on the head.
+  
+      This is created once and stays
+      attached to the character.
+      */
+
+      const worldHeadPosition = new THREE.Vector3(
+        center.x,
+        box.max.y - size.y * 0.26,
+        box.max.z + 0.05
+      );
+
+
+      /*
+      Convert WORLD position to the
+      character's LOCAL coordinate system.
+      */
+
+      this.headAnchor =
+        this.character.worldToLocal(
+          worldHeadPosition.clone()
+        );
+    }
+
+
+    // =====================================
+    // CONVERT FIXED LOCAL POINT
+    // TO WORLD POSITION
+    // =====================================
+
+    const headPosition =
+      this.headAnchor.clone();
+
+    this.character.localToWorld(
+      headPosition
     );
 
 
-    /*
-    Convert WORLD position to the
-    character's LOCAL coordinate system.
-    */
+    // =====================================
+    // PROJECT 3D POSITION TO SCREEN
+    // =====================================
 
-    this.headAnchor =
-      this.character.worldToLocal(
-        worldHeadPosition.clone()
-      );
+    headPosition.project(
+      this.experience.camera.instance
+    );
+
+
+    const hero = this.experience.hero;
+
+
+    const x =
+      (headPosition.x * 0.5 + 0.5) *
+      hero.clientWidth;
+
+    const y =
+      (-headPosition.y * 0.5 + 0.5) *
+      hero.clientHeight;
+
+
+    // =====================================
+    // UPDATE TEXT POSITION
+    // =====================================
+
+    this.headText.style.left =
+      `${x}px`;
+
+    this.headText.style.top =
+      `${y}px`;
   }
-
-
-  // =====================================
-  // CONVERT FIXED LOCAL POINT
-  // TO WORLD POSITION
-  // =====================================
-
-  const headPosition =
-    this.headAnchor.clone();
-
-  this.character.localToWorld(
-    headPosition
-  );
-
-
-  // =====================================
-  // PROJECT 3D POSITION TO SCREEN
-  // =====================================
-
-  headPosition.project(
-    this.experience.camera.instance
-  );
-
-
-  const hero = this.experience.hero;
-
-
-  const x =
-    (headPosition.x * 0.5 + 0.5) *
-    hero.clientWidth;
-
-  const y =
-    (-headPosition.y * 0.5 + 0.5) *
-    hero.clientHeight;
-
-
-  // =====================================
-  // UPDATE TEXT POSITION
-  // =====================================
-
-  this.headText.style.left =
-    `${x}px`;
-
-  this.headText.style.top =
-    `${y}px`;
-}
 
 
   update() {
@@ -908,51 +1036,122 @@ export default class World {
     if (!this.modelGroup) return;
 
 
-    // =====================================
-    // SMOOTH MOUSE MOVEMENT
-    // THIS WORKS BEFORE AND AFTER CLICK
-    // =====================================
+    /*
+    =====================================
+    DETECT MOBILE
+    =====================================
+    */
 
-    const mouseSpeed = 0.35;
-
-    this.mouse.x +=
-        (this.mouse.targetX - this.mouse.x) *
-        mouseSpeed;
-
-    this.mouse.y +=
-        (this.mouse.targetY - this.mouse.y) *
-        mouseSpeed;
+    const isMobile =
+      window.matchMedia(
+        "(max-width: 767px)"
+      ).matches;
 
 
-    // =====================================
-    // CHARACTER ROTATION WITH MOUSE
-    // THIS ALSO WORKS AFTER CLICK
-    // =====================================
+    /*
+    =====================================
+    INPUT SOURCE
+
+    Desktop → Mouse
+
+    Mobile → Phone Tilt
+    =====================================
+    */
+
+    let inputX;
+    let inputY;
+
+
+    if (isMobile) {
+
+      /*
+      -----------------------------
+      SMOOTH PHONE MOVEMENT
+      -----------------------------
+      */
+
+      const deviceSpeed = 0.08;
+
+
+      this.device.x +=
+        (
+          this.device.targetX -
+          this.device.x
+        ) * deviceSpeed;
+
+
+      this.device.y +=
+        (
+          this.device.targetY -
+          this.device.y
+        ) * deviceSpeed;
+
+
+      inputX = this.device.x;
+      inputY = this.device.y;
+
+    } else {
+
+      /*
+      -----------------------------
+      SMOOTH MOUSE MOVEMENT
+      -----------------------------
+      */
+
+      const mouseSpeed = 0.35;
+
+
+      this.mouse.x +=
+        (
+          this.mouse.targetX -
+          this.mouse.x
+        ) * mouseSpeed;
+
+
+      this.mouse.y +=
+        (
+          this.mouse.targetY -
+          this.mouse.y
+        ) * mouseSpeed;
+
+
+      inputX = this.mouse.x;
+      inputY = this.mouse.y;
+    }
+
+
+    /*
+    =====================================
+    CHARACTER ROTATION
+    =====================================
+    */
 
     const targetRotationY =
-        this.mouse.x * 0.45;
+      inputX * 0.45;
 
     const targetRotationX =
-        -this.mouse.y * 0.035;
+      -inputY * 0.035;
 
 
     this.modelGroup.rotation.y +=
-        (
-            targetRotationY -
-            this.modelGroup.rotation.y
-        ) * 0.18;
+      (
+        targetRotationY -
+        this.modelGroup.rotation.y
+      ) * 0.18;
 
 
     this.modelGroup.rotation.x +=
-        (
-            targetRotationX -
-            this.modelGroup.rotation.x
-        ) * 0.18;
+      (
+        targetRotationX -
+        this.modelGroup.rotation.x
+      ) * 0.18;
 
 
-    // =====================================
-    // CHARACTER POSITION
-    // =====================================
+    /*
+    =====================================
+    CHARACTER POSITION
+    =====================================
+    */
 
     let targetX;
     let targetY;
@@ -960,59 +1159,62 @@ export default class World {
 
     if (!this.isCharacterClicked) {
 
-        // BEFORE CLICK
-        // Character stays in original position
-        // with small mouse movement
+      // Before click
 
-        targetX =
-            this.characterTargetX +
-            this.mouse.x * 0.06;
+      targetX =
+        this.characterTargetX +
+        inputX * 0.06;
 
-        targetY =
-            this.characterBaseY +
-            this.mouse.y * 0.015;
+      targetY =
+        this.characterBaseY +
+        inputY * 0.015;
 
     } else {
 
-        // AFTER CLICK
-        // Character moves right
-        // but still has small mouse movement
+      // After click:
+      // character stays moved right
+      // but still reacts to mouse/phone
 
-        targetX =
-            this.characterTargetX +
-            this.mouse.x * 0.06;
+      targetX =
+        this.characterTargetX +
+        inputX * 0.06;
 
-        targetY =
-            this.characterBaseY +
-            this.mouse.y * 0.015;
+      targetY =
+        this.characterBaseY +
+        inputY * 0.015;
     }
 
 
-    // =====================================
-    // SMOOTH CHARACTER MOVEMENT
-    // =====================================
+    /*
+    =====================================
+    SMOOTH CHARACTER MOVEMENT
+    =====================================
+    */
 
     this.modelGroup.position.x +=
-        (
-            targetX -
-            this.modelGroup.position.x
-        ) * 0.08;
+      (
+        targetX -
+        this.modelGroup.position.x
+      ) * 0.08;
 
 
     this.modelGroup.position.y +=
-        (
-            targetY -
-            this.modelGroup.position.y
-        ) * 0.12;
+      (
+        targetY -
+        this.modelGroup.position.y
+      ) * 0.12;
 
 
-    // =====================================
-    // UPDATE CLICK ME TEXT
-    // ONLY BEFORE CLICK
-    // =====================================
+    /*
+    =====================================
+    UPDATE "CLICK ME" TEXT
+    =====================================
+    */
 
     if (!this.isCharacterClicked) {
-        this.updateHeadText();
+
+      this.updateHeadText();
+
     }
-}
+  }
 }
