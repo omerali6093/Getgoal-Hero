@@ -524,6 +524,8 @@ export default class World {
     this.character = null;
     this.modelGroup = new THREE.Group();
 
+    this.voiceAudio = null;
+
     this.mouse = {
       x: 0,
       y: 0,
@@ -863,68 +865,497 @@ export default class World {
       }
     );
   }
+   
+  // =======================================
+  // SPEAKING VOICE TEXT GENERATIION
+  // =======================================
 
 
-  handleClick() {
+  playClickVoice() {
 
-    const hero = document.querySelector(
-      "#custom-three-hero"
-    );
+    // Check voice URL
+    if (
+        !window.CTH_DATA ||
+        !window.CTH_DATA.voiceUrl
+    ) {
 
-    if (!hero) return;
+        console.error(
+            "Voice URL not found"
+        );
 
-    if (this.isCharacterClicked) return;
-
-
-    const textContent =
-      hero.querySelector(".cth-click-content");
-
-
-    if (!textContent) {
-      console.error("CLICK CONTENT NOT FOUND");
-      return;
+        return;
     }
 
 
-    // =====================================
-    // CHANGE CLICK STATE
-    // =====================================
+    /*
+    --------------------------------
+    STOP PREVIOUS AUDIO
+    --------------------------------
+    */
+
+    if (this.voiceAudio) {
+
+        this.voiceAudio.pause();
+
+        this.voiceAudio.currentTime = 0;
+
+    }
+
+
+    /*
+    --------------------------------
+    CREATE AUDIO
+    --------------------------------
+    */
+
+    this.voiceAudio =
+        new Audio(
+            window.CTH_DATA.voiceUrl
+        );
+
+
+    /*
+    --------------------------------
+    AUDIO SETTINGS
+    --------------------------------
+    */
+
+    this.voiceAudio.volume = 1;
+
+
+    /*
+    --------------------------------
+    PLAY
+    --------------------------------
+    */
+
+    this.voiceAudio
+        .play()
+        .then(() => {
+
+            console.log(
+                "🔊 CUSTOM VOICE PLAYING"
+            );
+
+        })
+        .catch((error) => {
+
+            console.error(
+                "🔊 CUSTOM VOICE ERROR:",
+                error
+            );
+
+        });
+}
+
+//   speakClickContent() {
+
+//     if (!("speechSynthesis" in window)) {
+//         console.error("Speech synthesis is not supported.");
+//         return;
+//     }
+
+//     const hero = this.experience.hero;
+
+//     if (!hero) return;
+
+//     const textContent =
+//         hero.querySelector(".cth-click-content");
+
+//     if (!textContent) {
+//         console.error("Speech content not found.");
+//         return;
+//     }
+
+
+//     // =====================================
+//     // GET TEXT
+//     // =====================================
+
+//     const heading =
+//         textContent.querySelector("h2");
+
+//     const paragraph =
+//         textContent.querySelector("p");
+
+
+//     let speechText = "";
+
+
+//     if (heading) {
+//         speechText += heading.innerText
+//             .replace(/\s+/g, " ")
+//             .trim();
+//     }
+
+
+//     if (paragraph) {
+//         speechText +=
+//             ". " +
+//             paragraph.innerText
+//                 .replace(/\s+/g, " ")
+//                 .trim();
+//     }
+
+
+//     if (!speechText) {
+//         console.error("Nothing to speak.");
+//         return;
+//     }
+
+
+//     console.log(
+//         "Speech text:",
+//         speechText
+//     );
+
+
+//     // =====================================
+//     // CANCEL PREVIOUS SPEECH
+//     // =====================================
+
+//     window.speechSynthesis.cancel();
+
+
+//     // =====================================
+//     // GET VOICES
+//     // =====================================
+
+//     const voices =
+//         window.speechSynthesis.getVoices();
+
+
+//     console.log(
+//         "Available voices:",
+//         voices
+//     );
+
+
+//     // Find an English voice
+//     const voice =
+//         voices.find(v =>
+//             v.lang === "en-US"
+//         ) ||
+//         voices.find(v =>
+//             v.lang.startsWith("en")
+//         ) ||
+//         voices[0];
+
+
+//     if (!voice) {
+//         console.error(
+//             "No speech voice available."
+//         );
+//         return;
+//     }
+
+
+//     console.log(
+//         "Using voice:",
+//         voice.name,
+//         voice.lang
+//     );
+
+
+//     // =====================================
+//     // CREATE SPEECH
+//     // =====================================
+
+//     const utterance =
+//         new SpeechSynthesisUtterance(
+//             speechText
+//         );
+
+
+//     utterance.voice = voice;
+
+//     utterance.lang =
+//         voice.lang || "en-US";
+
+//     utterance.rate = 0.85;
+
+//     utterance.pitch = 1;
+
+//     utterance.volume = 1;
+
+
+//     // =====================================
+//     // DEBUG
+//     // =====================================
+
+//     utterance.onstart = () => {
+
+//         console.log(
+//             "🔊 VOICE STARTED"
+//         );
+
+//     };
+
+
+//     utterance.onend = () => {
+
+//         console.log(
+//             "🔊 VOICE FINISHED"
+//         );
+
+//     };
+
+
+//     utterance.onerror = (event) => {
+
+//         console.error(
+//             "🔊 VOICE ERROR:",
+//             event.error
+//         );
+
+//     };
+
+
+//     // =====================================
+//     // SPEAK
+//     // =====================================
+
+//     window.speechSynthesis.speak(
+//         utterance
+//     );
+// }
+
+  // handleClick() {
+
+  handleClick() {
+
+    const hero =
+        document.querySelector(
+            "#custom-three-hero"
+        );
+
+
+    if (!hero) return;
+
+
+    /*
+    --------------------------------
+    PREVENT SECOND CLICK
+    --------------------------------
+    */
+
+    if (this.isCharacterClicked) {
+        return;
+    }
+
+
+    /*
+    --------------------------------
+    GET TEXT
+    --------------------------------
+    */
+
+    const textContent =
+        hero.querySelector(
+            ".cth-click-content"
+        );
+
+
+    if (!textContent) {
+
+        console.error(
+            "CLICK CONTENT NOT FOUND"
+        );
+
+        return;
+    }
+
+
+    /*
+    --------------------------------
+    CHARACTER CLICKED
+    --------------------------------
+    */
 
     this.isCharacterClicked = true;
 
 
-    // =====================================
-    // HIDE CLICK ME
-    // =====================================
+    console.log(
+        "CHARACTER CLICKED"
+    );
+
+
+    /*
+    --------------------------------
+    HIDE CLICK ME
+    --------------------------------
+    */
 
     if (this.headText) {
 
-      this.headText.style.opacity = "0";
+        this.headText.style.opacity = "0";
 
-      this.headText.style.visibility =
-        "hidden";
+        this.headText.style.visibility =
+            "hidden";
 
-      this.headText.style.pointerEvents =
-        "none";
+        this.headText.style.pointerEvents =
+            "none";
+
     }
 
 
-    // =====================================
-    // SHOW LEFT TEXT
-    // =====================================
+    /*
+    --------------------------------
+    SHOW MAIN TEXT
+    --------------------------------
+    */
 
-    textContent.classList.add("active");
+    textContent.classList.add(
+        "active"
+    );
 
 
-    // =====================================
-    // MOVE CHARACTER RIGHT
-    // =====================================
+    /*
+    --------------------------------
+    PLAY CUSTOM VOICE
+    --------------------------------
+    */
+
+    this.playClickVoice();
+
+
+    /*
+    --------------------------------
+    MOVE CHARACTER RIGHT
+    --------------------------------
+    */
 
     this.characterTargetX = 2.2;
 
 
-    console.log("Character clicked successfully");
-  }
+    console.log(
+        "TEXT + CUSTOM VOICE + CHARACTER MOVEMENT STARTED"
+    );
+}
+
+playVoice() {
+
+    if (!("speechSynthesis" in window)) {
+        console.error("Speech synthesis unavailable");
+        return;
+    }
+
+    const text =
+        "Let's Create Something Amazing.";
+
+    // Stop anything currently speaking
+    window.speechSynthesis.cancel();
+
+    const utterance =
+        new SpeechSynthesisUtterance(text);
+
+    utterance.lang = "en-US";
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+
+
+    // Get browser voices
+    const voices =
+        window.speechSynthesis.getVoices();
+
+    const voice =
+        voices.find(v => v.lang === "en-US") ||
+        voices.find(v => v.lang.startsWith("en")) ||
+        voices[0];
+
+    if (voice) {
+        utterance.voice = voice;
+
+        console.log(
+            "Using voice:",
+            voice.name
+        );
+    }
+
+
+    utterance.onstart = () => {
+        console.log("🔊 VOICE REALLY STARTED");
+    };
+
+    utterance.onend = () => {
+        console.log("🔊 VOICE FINISHED");
+    };
+
+    utterance.onerror = (event) => {
+        console.error(
+            "🔊 VOICE ERROR:",
+            event.error
+        );
+    };
+
+
+    // IMPORTANT:
+    // This is executed directly from handleClick()
+    window.speechSynthesis.speak(
+        utterance
+    );
+}
+
+  //   const hero = document.querySelector(
+  //     "#custom-three-hero"
+  //   );
+
+  //   if (!hero) return;
+
+  //   if (this.isCharacterClicked) return;
+
+
+  //   const textContent =
+  //     hero.querySelector(".cth-click-content");
+
+
+  //   if (!textContent) {
+  //     console.error("CLICK CONTENT NOT FOUND");
+  //     return;
+  //   }
+
+
+  //   // =====================================
+  //   // CHANGE CLICK STATE
+  //   // =====================================
+
+  //   this.isCharacterClicked = true;
+
+
+  //   // =====================================
+  //   // HIDE CLICK ME
+  //   // =====================================
+
+  //   if (this.headText) {
+
+  //     this.headText.style.opacity = "0";
+
+  //     this.headText.style.visibility =
+  //       "hidden";
+
+  //     this.headText.style.pointerEvents =
+  //       "none";
+  //   }
+
+
+  //   // =====================================
+  //   // SHOW LEFT TEXT
+  //   // =====================================
+
+  //   textContent.classList.add("active");
+
+
+
+  //   // =====================================
+  //   // MOVE CHARACTER RIGHT
+  //   // =====================================
+
+  //   this.characterTargetX = 2.2;
+
+
+  //   console.log("Character clicked successfully");
+  // }
 
   // =====================================
   // NEW: UPDATE HEAD TEXT POSITION

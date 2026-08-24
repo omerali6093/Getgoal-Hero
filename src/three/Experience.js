@@ -33,6 +33,15 @@ export default class Experience {
     this.renderer = new Renderer(this);
     this.world = new World(this);
 
+    // Load browser speech voices
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.getVoices();
+
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
     // Events
     this.setupEvents();
 
@@ -53,9 +62,19 @@ export default class Experience {
     });
 
     // Click event
+    // this.hero.addEventListener("click", (event) => {
+
+    //   // Start speech directly from the user's click
+    //   this.world.speakClickContent();
+
+    //   // Then run the normal character click logic
+    //   this.world.handleClick(event);
+
+    // });
+
     this.hero.addEventListener("click", (event) => {
-      this.world.handleClick(event);
-    });
+    this.world.handleClick(event);
+});
 
     // Resize
     window.addEventListener("resize", () => {
@@ -84,16 +103,16 @@ export default class Experience {
   // }
 
   tick() {
-  this.world.update();
+    this.world.update();
 
-  this.renderer.instance.render(
-    this.scene,
-    this.camera.instance
-  );
+    this.renderer.instance.render(
+      this.scene,
+      this.camera.instance
+    );
 
-  requestAnimationFrame(() => {
-    this.tick();
-  });
-}
+    requestAnimationFrame(() => {
+      this.tick();
+    });
+  }
 
 }

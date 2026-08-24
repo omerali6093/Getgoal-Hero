@@ -493,7 +493,7 @@ body {
 
 /* HELLO */
 
-.cth-click-content span {
+.cth-click-content strong {
     display: inline-block;
 
     font-size: 14px;
@@ -507,7 +507,7 @@ body {
 
 /* HEADING */
 
-.cth-click-content h2 {
+.cth-click-content h1 {
     margin: 0;
 
     font-size: clamp(36px, 5vw, 72px);
@@ -518,7 +518,7 @@ body {
 }
 
 
-.cth-click-content h2 strong {
+.cth-click-content h1 strong {
     display: block;
 
     font-weight: 700;
