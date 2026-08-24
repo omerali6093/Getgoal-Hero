@@ -1,4 +1,4 @@
-```php
+
 <?php
 /**
  * Plugin Name: Custom Three Hero
