@@ -23,8 +23,9 @@ function cth_enqueue_assets() {
     $plugin_url  = plugin_dir_url( __FILE__ );
     $plugin_path = plugin_dir_path( __FILE__ );
 
+
     /*
-     * Files
+     * FILE PATHS
      */
 
     $css_file = $plugin_path . 'dist/assets/main.css';
@@ -32,7 +33,7 @@ function cth_enqueue_assets() {
 
 
     /*
-     * CSS
+     * LOAD CSS
      */
 
     if ( file_exists( $css_file ) ) {
@@ -48,7 +49,7 @@ function cth_enqueue_assets() {
 
 
     /*
-     * JAVASCRIPT
+     * LOAD JAVASCRIPT
      */
 
     if ( file_exists( $js_file ) ) {
@@ -63,7 +64,8 @@ function cth_enqueue_assets() {
 
 
         /*
-         * ES MODULE
+         * IMPORTANT:
+         * Load JS as ES MODULE
          */
 
         wp_script_add_data(
@@ -74,25 +76,21 @@ function cth_enqueue_assets() {
 
 
         /*
-         * Send plugin data to Three.js
+         * THREE.JS / PLUGIN DATA
          */
 
         wp_add_inline_script(
-            'custom-three-hero-script',
+    'custom-three-hero-script',
 
-            'window.CTH_DATA = ' . wp_json_encode(
-                array(
-                    'pluginUrl' => $plugin_url,
+    'window.CTH_DATA = ' . wp_json_encode(
+        array(
+            'pluginUrl' => $plugin_url,
+            'voiceUrl'  => $plugin_url . 'audio/hero-voice.mp3'
+        )
+    ) . ';',
 
-                    /*
-                     * Custom voice file
-                     */
-                    'voiceUrl' => $plugin_url . 'audio/hero-voice.mp3'
-                )
-            ) . ';',
-
-            'before'
-        );
+    'before'
+);
 
     }
 
@@ -122,139 +120,244 @@ function cth_hero_shortcode() {
     >
 
 
-        <!-- =====================================
+        <!-- =====================================================
              THREE.JS CANVAS
-        ====================================== -->
+        ====================================================== -->
 
         <canvas
             class="cth-canvas"
         ></canvas>
 
 
-        <!-- =====================================
+        <!-- =====================================================
              BACKGROUND
-        ====================================== -->
+        ====================================================== -->
 
         <div
             class="cth-background"
         ></div>
 
 
-        <!-- =====================================
+        <!-- =====================================================
              MAIN HERO CONTENT
-        ====================================== -->
+        ====================================================== -->
 
         <div
             class="cth-content"
         >
 
 
-            <!-- AGENCY TAG -->
+            <!-- ===============================
+                 EYEBROW
+            ================================ -->
 
             <div
-                class="cth-tag"
+                class="cth-eyebrow"
             >
-                GETGOAL SOLUTIONS
+
+                <span
+                    class="cth-dot"
+                ></span>
+
+
+                <span>
+                    AGENCY
+                </span>
+
+
+                <span
+                    class="cth-rule"
+                ></span>
+
+
+                <span>
+                    MULTI-DISCIPLINE
+                </span>
+
             </div>
 
 
-            <!-- MAIN HEADING -->
+            <!-- ===============================
+                 MAIN HEADING
+            ================================ -->
 
             <h1>
 
                 A MULTI-TECH AGENCY
 
-                <span>
+                <br>
+
+                <span
+                    class="thin"
+                >
                     BUILT FOR
                 </span>
 
-                <span>
+                <span
+                    class="accent"
+                >
                     WHAT’S NEXT
                 </span>
 
             </h1>
 
 
-            <!-- DESCRIPTION -->
+            <!-- ===============================
+                 MAIN PARAGRAPH
+            ================================ -->
 
             <p>
-                We combine design, technology, marketing, and innovation
-                to turn ideas into impactful digital experiences.
+                We combine design, technology, marketing, and
+                innovation to turn ideas into impactful digital
+                experiences.
             </p>
 
 
-            <!-- BUTTONS -->
+            <!-- ===============================
+                 SERVICE MODULES
+            ================================ -->
 
             <div
-                class="cth-buttons"
+                class="cth-modules"
             >
 
-
-                <a
-                    href="#services"
-                    class="cth-primary-button"
+                <div
+                    class="cth-module"
                 >
-                    Explore Services
-                </a>
+                    Design
+                </div>
 
 
-                <a
-                    href="#contact"
-                    class="cth-secondary-button"
+                <div
+                    class="cth-module"
                 >
-                    Let's Talk
-                </a>
+                    Technology
+                </div>
 
+
+                <div
+                    class="cth-module"
+                >
+                    Marketing
+                </div>
+
+
+                <div
+                    class="cth-module"
+                >
+                    Innovation
+                </div>
 
             </div>
 
-
         </div>
 
 
-        <!-- =====================================
-             CLICK GENERATED CONTENT
-             
-             IMPORTANT:
-             CSS expects h1 here.
-        ====================================== -->
+        <!-- =====================================================
+             CLICK CONTENT
+             KEPT FOR YOUR EXISTING CLICK / TEXT LOGIC
+        ====================================================== -->
 
-        <div
-            class="cth-click-content"
-        >
+        <!-- =====================================================
+     CLICK CONTENT
+     KEEPING VOICE/SOUND COMPATIBILITY
+===================================================== -->
 
+<div
+    class="cth-click-content"
+>
 
-            <span>
-                A MULTI-TECH AGENCY
-            </span>
+    <!-- Visible heading -->
+    <h1>
 
+        A MULTI-TECH AGENCY
 
-            <h1>
+        <br>
 
-                BUILT FOR
+        <span class="thin">
+            BUILT FOR
+        </span>
 
-                <strong>
-                    WHAT’S NEXT
-                </strong>
+        <span class="accent">
+            WHAT’S NEXT
+        </span>
 
-            </h1>
-
-
-            <p>
-                We combine design, technology, marketing, and innovation
-                to turn ideas into impactful digital experiences.
-            </p>
+    </h1>
 
 
+    <!-- Visible paragraph -->
+    <p>
+        We combine design, technology, marketing, and
+        innovation to turn ideas into impactful digital
+        experiences.
+    </p>
+
+
+    <!-- Service modules -->
+    <div class="cth-modules">
+
+        <div class="cth-module">
+            Design
         </div>
 
+        <div class="cth-module">
+            Technology
+        </div>
 
-        <!-- =====================================
-             3D CHARACTER HEAD TEXT
-             
-             World.js positions this element
-             over the character's head.
-        ====================================== -->
+        <div class="cth-module">
+            Marketing
+        </div>
+
+        <div class="cth-module">
+            Innovation
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         VOICE COMPATIBILITY ELEMENTS
+
+         These preserve the old HTML selectors used
+         by the voice/sound JavaScript.
+    ================================================== -->
+
+    <div
+        class="cth-voice-content"
+        style="display:none;"
+        aria-hidden="true"
+    >
+
+        <span>
+            HELLO
+        </span>
+
+        <h2>
+
+            A MULTI-TECH AGENCY
+
+            <strong>
+                BUILT FOR WHAT’S NEXT
+            </strong>
+
+        </h2>
+
+        <p>
+            We combine design, technology, marketing, and
+            innovation to turn ideas into impactful digital
+            experiences.
+        </p>
+
+    </div>
+
+</div>
+
+
+        <!-- =====================================================
+             CLICK ME TEXT
+             POSITIONED BY THREE.JS
+             INSIDE / OVER THE CHARACTER HEAD
+        ====================================================== -->
 
         <div
             class="cth-head-text"
@@ -264,14 +367,13 @@ function cth_hero_shortcode() {
         </div>
 
 
-        <!-- =====================================
+        <!-- =====================================================
              INTERACTION HINT
-        ====================================== -->
+        ====================================================== -->
 
         <div
             class="cth-interaction"
         >
-
 
             <span
                 class="cth-pulse"
@@ -281,7 +383,6 @@ function cth_hero_shortcode() {
             <span>
                 Move your mouse and click the character
             </span>
-
 
         </div>
 
@@ -298,4 +399,3 @@ add_shortcode(
     'custom_three_hero',
     'cth_hero_shortcode'
 );
-
