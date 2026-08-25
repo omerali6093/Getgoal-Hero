@@ -432,48 +432,46 @@ body {
 
     color: #ffffff;
 
-    font-size:
-        clamp(
-            36px,
-            5vw,
-            72px
-        );
+    font-size: 52px;
 
     line-height: 1.1;
 
     font-weight: 500;
+    margin-bottom: 20px;
 }
 
 
-.cth-click-content h1 strong {
-    display: block;
+.cth-click-content h1 span {
+    /* display: block; */
 
+    font-size: 42px;
+
+    font-weight: 500;
+}
+
+.cth-click-content .thin {
+    color: #8F939A;
+}
+
+.cth-click-content .accent {
     color: #00c8ff;
-
-    font-weight: 700;
 }
 
 
-.cth-click-content h2 {
-    margin-top: 20px;
-
-    font-size:
-        clamp(
-            40px,
-            5vw,
-            75px
-        );
-
-    line-height: 1;
-
-    letter-spacing: -3px;
+.cth-click-content p {
+    color: #A9ADB2;
+    width: 350px;
 }
-
 
 .cth-click-content h2 strong {
     display: block;
 
     color: #00c8ff;
+}
+
+.cth-modules .cth-module:hover {
+    color: #101A2B;
+    background-color: #00c8ff;
 }
 
 
