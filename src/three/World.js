@@ -583,6 +583,36 @@ export default class World {
       this.mouse.targetX = 0;
       this.mouse.targetY = 0;
     });
+
+    // ========================================
+    // MOBILE DEVICE ROTATION
+    // ========================================
+
+    if (window.DeviceOrientationEvent) {
+
+      const handleOrientation = (event) => {
+
+        let gamma = event.gamma || 0; // left / right
+        let beta = event.beta || 0;   // up / down
+
+        // Limit phone movement
+        gamma = THREE.MathUtils.clamp(gamma, -30, 30);
+        beta = THREE.MathUtils.clamp(beta, -30, 30);
+
+        // Convert phone rotation to same -1 to 1 range
+        this.mouse.targetX = gamma / 30;
+
+        this.mouse.targetY = -beta / 30;
+      };
+
+      window.addEventListener(
+        "deviceorientation",
+        handleOrientation,
+        true
+      );
+    }
+
+
   }
 
   setupDeviceOrientation() {
@@ -776,7 +806,7 @@ export default class World {
 
         const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
-        const desiredSize = isMobile ? 5 : 7;
+        const desiredSize = isMobile ? 4 : 7;
 
         const scale = desiredSize / maxDimension;
 
@@ -865,7 +895,7 @@ export default class World {
       }
     );
   }
-   
+
   // =======================================
   // SPEAKING VOICE TEXT GENERATIION
   // =======================================
@@ -875,15 +905,15 @@ export default class World {
 
     // Check voice URL
     if (
-        !window.CTH_DATA ||
-        !window.CTH_DATA.voiceUrl
+      !window.CTH_DATA ||
+      !window.CTH_DATA.voiceUrl
     ) {
 
-        console.error(
-            "Voice URL not found"
-        );
+      console.error(
+        "Voice URL not found"
+      );
 
-        return;
+      return;
     }
 
 
@@ -895,9 +925,9 @@ export default class World {
 
     if (this.voiceAudio) {
 
-        this.voiceAudio.pause();
+      this.voiceAudio.pause();
 
-        this.voiceAudio.currentTime = 0;
+      this.voiceAudio.currentTime = 0;
 
     }
 
@@ -909,9 +939,9 @@ export default class World {
     */
 
     this.voiceAudio =
-        new Audio(
-            window.CTH_DATA.voiceUrl
-        );
+      new Audio(
+        window.CTH_DATA.voiceUrl
+      );
 
 
     /*
@@ -930,204 +960,236 @@ export default class World {
     */
 
     this.voiceAudio
-        .play()
-        .then(() => {
+      .play()
+      .then(() => {
 
-            console.log(
-                "🔊 CUSTOM VOICE PLAYING"
-            );
+        console.log(
+          "🔊 CUSTOM VOICE PLAYING"
+        );
 
-        })
-        .catch((error) => {
+      })
+      .catch((error) => {
 
-            console.error(
-                "🔊 CUSTOM VOICE ERROR:",
-                error
-            );
+        console.error(
+          "🔊 CUSTOM VOICE ERROR:",
+          error
+        );
 
-        });
-}
+      });
+  }
 
-//   speakClickContent() {
+  //   speakClickContent() {
 
-//     if (!("speechSynthesis" in window)) {
-//         console.error("Speech synthesis is not supported.");
-//         return;
-//     }
+  //     if (!("speechSynthesis" in window)) {
+  //         console.error("Speech synthesis is not supported.");
+  //         return;
+  //     }
 
-//     const hero = this.experience.hero;
+  //     const hero = this.experience.hero;
 
-//     if (!hero) return;
+  //     if (!hero) return;
 
-//     const textContent =
-//         hero.querySelector(".cth-click-content");
+  //     const textContent =
+  //         hero.querySelector(".cth-click-content");
 
-//     if (!textContent) {
-//         console.error("Speech content not found.");
-//         return;
-//     }
-
-
-//     // =====================================
-//     // GET TEXT
-//     // =====================================
-
-//     const heading =
-//         textContent.querySelector("h2");
-
-//     const paragraph =
-//         textContent.querySelector("p");
+  //     if (!textContent) {
+  //         console.error("Speech content not found.");
+  //         return;
+  //     }
 
 
-//     let speechText = "";
+  //     // =====================================
+  //     // GET TEXT
+  //     // =====================================
+
+  //     const heading =
+  //         textContent.querySelector("h2");
+
+  //     const paragraph =
+  //         textContent.querySelector("p");
 
 
-//     if (heading) {
-//         speechText += heading.innerText
-//             .replace(/\s+/g, " ")
-//             .trim();
-//     }
+  //     let speechText = "";
 
 
-//     if (paragraph) {
-//         speechText +=
-//             ". " +
-//             paragraph.innerText
-//                 .replace(/\s+/g, " ")
-//                 .trim();
-//     }
+  //     if (heading) {
+  //         speechText += heading.innerText
+  //             .replace(/\s+/g, " ")
+  //             .trim();
+  //     }
 
 
-//     if (!speechText) {
-//         console.error("Nothing to speak.");
-//         return;
-//     }
+  //     if (paragraph) {
+  //         speechText +=
+  //             ". " +
+  //             paragraph.innerText
+  //                 .replace(/\s+/g, " ")
+  //                 .trim();
+  //     }
 
 
-//     console.log(
-//         "Speech text:",
-//         speechText
-//     );
+  //     if (!speechText) {
+  //         console.error("Nothing to speak.");
+  //         return;
+  //     }
 
 
-//     // =====================================
-//     // CANCEL PREVIOUS SPEECH
-//     // =====================================
-
-//     window.speechSynthesis.cancel();
-
-
-//     // =====================================
-//     // GET VOICES
-//     // =====================================
-
-//     const voices =
-//         window.speechSynthesis.getVoices();
+  //     console.log(
+  //         "Speech text:",
+  //         speechText
+  //     );
 
 
-//     console.log(
-//         "Available voices:",
-//         voices
-//     );
+  //     // =====================================
+  //     // CANCEL PREVIOUS SPEECH
+  //     // =====================================
+
+  //     window.speechSynthesis.cancel();
 
 
-//     // Find an English voice
-//     const voice =
-//         voices.find(v =>
-//             v.lang === "en-US"
-//         ) ||
-//         voices.find(v =>
-//             v.lang.startsWith("en")
-//         ) ||
-//         voices[0];
+  //     // =====================================
+  //     // GET VOICES
+  //     // =====================================
+
+  //     const voices =
+  //         window.speechSynthesis.getVoices();
 
 
-//     if (!voice) {
-//         console.error(
-//             "No speech voice available."
-//         );
-//         return;
-//     }
+  //     console.log(
+  //         "Available voices:",
+  //         voices
+  //     );
 
 
-//     console.log(
-//         "Using voice:",
-//         voice.name,
-//         voice.lang
-//     );
+  //     // Find an English voice
+  //     const voice =
+  //         voices.find(v =>
+  //             v.lang === "en-US"
+  //         ) ||
+  //         voices.find(v =>
+  //             v.lang.startsWith("en")
+  //         ) ||
+  //         voices[0];
 
 
-//     // =====================================
-//     // CREATE SPEECH
-//     // =====================================
-
-//     const utterance =
-//         new SpeechSynthesisUtterance(
-//             speechText
-//         );
+  //     if (!voice) {
+  //         console.error(
+  //             "No speech voice available."
+  //         );
+  //         return;
+  //     }
 
 
-//     utterance.voice = voice;
-
-//     utterance.lang =
-//         voice.lang || "en-US";
-
-//     utterance.rate = 0.85;
-
-//     utterance.pitch = 1;
-
-//     utterance.volume = 1;
+  //     console.log(
+  //         "Using voice:",
+  //         voice.name,
+  //         voice.lang
+  //     );
 
 
-//     // =====================================
-//     // DEBUG
-//     // =====================================
+  //     // =====================================
+  //     // CREATE SPEECH
+  //     // =====================================
 
-//     utterance.onstart = () => {
-
-//         console.log(
-//             "🔊 VOICE STARTED"
-//         );
-
-//     };
+  //     const utterance =
+  //         new SpeechSynthesisUtterance(
+  //             speechText
+  //         );
 
 
-//     utterance.onend = () => {
+  //     utterance.voice = voice;
 
-//         console.log(
-//             "🔊 VOICE FINISHED"
-//         );
+  //     utterance.lang =
+  //         voice.lang || "en-US";
 
-//     };
+  //     utterance.rate = 0.85;
 
+  //     utterance.pitch = 1;
 
-//     utterance.onerror = (event) => {
-
-//         console.error(
-//             "🔊 VOICE ERROR:",
-//             event.error
-//         );
-
-//     };
+  //     utterance.volume = 1;
 
 
-//     // =====================================
-//     // SPEAK
-//     // =====================================
+  //     // =====================================
+  //     // DEBUG
+  //     // =====================================
 
-//     window.speechSynthesis.speak(
-//         utterance
-//     );
-// }
+  //     utterance.onstart = () => {
+
+  //         console.log(
+  //             "🔊 VOICE STARTED"
+  //         );
+
+  //     };
+
+
+  //     utterance.onend = () => {
+
+  //         console.log(
+  //             "🔊 VOICE FINISHED"
+  //         );
+
+  //     };
+
+
+  //     utterance.onerror = (event) => {
+
+  //         console.error(
+  //             "🔊 VOICE ERROR:",
+  //             event.error
+  //         );
+
+  //     };
+
+
+  //     // =====================================
+  //     // SPEAK
+  //     // =====================================
+
+  //     window.speechSynthesis.speak(
+  //         utterance
+  //     );
+  // }
 
   // handleClick() {
 
   handleClick() {
 
+    // ========================================
+    // MOBILE MOTION PERMISSION
+    // ========================================
+
+    if (
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof DeviceOrientationEvent.requestPermission === "function"
+    ) {
+
+      DeviceOrientationEvent
+        .requestPermission()
+        .then((permission) => {
+
+          if (permission === "granted") {
+
+            console.log(
+              "📱 DEVICE MOTION ENABLED"
+            );
+
+          }
+
+        })
+        .catch((error) => {
+
+          console.error(
+            "📱 DEVICE MOTION PERMISSION ERROR:",
+            error
+          );
+
+        });
+    }
+
     const hero =
-        document.querySelector(
-            "#custom-three-hero"
-        );
+      document.querySelector(
+        "#custom-three-hero"
+      );
 
 
     if (!hero) return;
@@ -1140,7 +1202,7 @@ export default class World {
     */
 
     if (this.isCharacterClicked) {
-        return;
+      return;
     }
 
 
@@ -1151,18 +1213,18 @@ export default class World {
     */
 
     const textContent =
-        hero.querySelector(
-            ".cth-click-content"
-        );
+      hero.querySelector(
+        ".cth-click-content"
+      );
 
 
     if (!textContent) {
 
-        console.error(
-            "CLICK CONTENT NOT FOUND"
-        );
+      console.error(
+        "CLICK CONTENT NOT FOUND"
+      );
 
-        return;
+      return;
     }
 
 
@@ -1176,7 +1238,7 @@ export default class World {
 
 
     console.log(
-        "CHARACTER CLICKED"
+      "CHARACTER CLICKED"
     );
 
 
@@ -1188,13 +1250,13 @@ export default class World {
 
     if (this.headText) {
 
-        this.headText.style.opacity = "0";
+      this.headText.style.opacity = "0";
 
-        this.headText.style.visibility =
-            "hidden";
+      this.headText.style.visibility =
+        "hidden";
 
-        this.headText.style.pointerEvents =
-            "none";
+      this.headText.style.pointerEvents =
+        "none";
 
     }
 
@@ -1206,7 +1268,7 @@ export default class World {
     */
 
     textContent.classList.add(
-        "active"
+      "active"
     );
 
 
@@ -1229,25 +1291,25 @@ export default class World {
 
 
     console.log(
-        "TEXT + CUSTOM VOICE + CHARACTER MOVEMENT STARTED"
+      "TEXT + CUSTOM VOICE + CHARACTER MOVEMENT STARTED"
     );
-}
+  }
 
-playVoice() {
+  playVoice() {
 
     if (!("speechSynthesis" in window)) {
-        console.error("Speech synthesis unavailable");
-        return;
+      console.error("Speech synthesis unavailable");
+      return;
     }
 
     const text =
-        "Let's Create Something Amazing.";
+      "Let's Create Something Amazing.";
 
     // Stop anything currently speaking
     window.speechSynthesis.cancel();
 
     const utterance =
-        new SpeechSynthesisUtterance(text);
+      new SpeechSynthesisUtterance(text);
 
     utterance.lang = "en-US";
     utterance.rate = 0.9;
@@ -1257,45 +1319,45 @@ playVoice() {
 
     // Get browser voices
     const voices =
-        window.speechSynthesis.getVoices();
+      window.speechSynthesis.getVoices();
 
     const voice =
-        voices.find(v => v.lang === "en-US") ||
-        voices.find(v => v.lang.startsWith("en")) ||
-        voices[0];
+      voices.find(v => v.lang === "en-US") ||
+      voices.find(v => v.lang.startsWith("en")) ||
+      voices[0];
 
     if (voice) {
-        utterance.voice = voice;
+      utterance.voice = voice;
 
-        console.log(
-            "Using voice:",
-            voice.name
-        );
+      console.log(
+        "Using voice:",
+        voice.name
+      );
     }
 
 
     utterance.onstart = () => {
-        console.log("🔊 VOICE REALLY STARTED");
+      console.log("🔊 VOICE REALLY STARTED");
     };
 
     utterance.onend = () => {
-        console.log("🔊 VOICE FINISHED");
+      console.log("🔊 VOICE FINISHED");
     };
 
     utterance.onerror = (event) => {
-        console.error(
-            "🔊 VOICE ERROR:",
-            event.error
-        );
+      console.error(
+        "🔊 VOICE ERROR:",
+        event.error
+      );
     };
 
 
     // IMPORTANT:
     // This is executed directly from handleClick()
     window.speechSynthesis.speak(
-        utterance
+      utterance
     );
-}
+  }
 
   //   const hero = document.querySelector(
   //     "#custom-three-hero"
@@ -1462,100 +1524,276 @@ playVoice() {
   }
 
 
+  // update() {
+
+  //   if (!this.modelGroup) return;
+
+
+  //   /*
+  //   =====================================
+  //   DETECT MOBILE
+  //   =====================================
+  //   */
+
+  //   const isMobile =
+  //     window.matchMedia(
+  //       "(max-width: 767px)"
+  //     ).matches;
+
+
+  //   /*
+  //   =====================================
+  //   INPUT SOURCE
+
+  //   Desktop → Mouse
+
+  //   Mobile → Phone Tilt
+  //   =====================================
+  //   */
+
+  //   let inputX;
+  //   let inputY;
+
+
+  //   if (isMobile) {
+
+  //     /*
+  //     -----------------------------
+  //     SMOOTH PHONE MOVEMENT
+  //     -----------------------------
+  //     */
+
+  //     const deviceSpeed = 0.08;
+
+
+  //     this.device.x +=
+  //       (
+  //         this.device.targetX -
+  //         this.device.x
+  //       ) * deviceSpeed;
+
+
+  //     this.device.y +=
+  //       (
+  //         this.device.targetY -
+  //         this.device.y
+  //       ) * deviceSpeed;
+
+
+  //     inputX = this.device.x;
+  //     inputY = this.device.y;
+
+  //   } else {
+
+  //     /*
+  //     -----------------------------
+  //     SMOOTH MOUSE MOVEMENT
+  //     -----------------------------
+  //     */
+
+  //     const mouseSpeed = 0.35;
+
+
+  //     this.mouse.x +=
+  //       (
+  //         this.mouse.targetX -
+  //         this.mouse.x
+  //       ) * mouseSpeed;
+
+
+  //     this.mouse.y +=
+  //       (
+  //         this.mouse.targetY -
+  //         this.mouse.y
+  //       ) * mouseSpeed;
+
+
+  //     inputX = this.mouse.x;
+  //     inputY = this.mouse.y;
+  //   }
+
+
+  //   /*
+  //   =====================================
+  //   CHARACTER ROTATION
+  //   =====================================
+  //   */
+
+  //   const targetRotationY =
+  //     inputX * 0.45;
+
+  //   const targetRotationX =
+  //     -inputY * 0.035;
+
+
+  //   this.modelGroup.rotation.y +=
+  //     (
+  //       targetRotationY -
+  //       this.modelGroup.rotation.y
+  //     ) * 0.18;
+
+
+  //   this.modelGroup.rotation.x +=
+  //     (
+  //       targetRotationX -
+  //       this.modelGroup.rotation.x
+  //     ) * 0.18;
+
+
+  //   /*
+  //   =====================================
+  //   CHARACTER POSITION
+  //   =====================================
+  //   */
+
+  //   let targetX;
+  //   let targetY;
+
+
+  //   if (!this.isCharacterClicked) {
+
+  //     // Before click
+
+  //     targetX =
+  //       this.characterTargetX +
+  //       inputX * 0.06;
+
+  //     targetY =
+  //       this.characterBaseY +
+  //       inputY * 0.015;
+
+  //   } else {
+
+  //     // After click:
+  //     // character stays moved right
+  //     // but still reacts to mouse/phone
+
+  //     targetX =
+  //       this.characterTargetX +
+  //       inputX * 0.06;
+
+  //     targetY =
+  //       this.characterBaseY +
+  //       inputY * 0.015;
+  //   }
+
+
+  //   /*
+  //   =====================================
+  //   SMOOTH CHARACTER MOVEMENT
+  //   =====================================
+  //   */
+
+  //   this.modelGroup.position.x +=
+  //     (
+  //       targetX -
+  //       this.modelGroup.position.x
+  //     ) * 0.08;
+
+
+  //   this.modelGroup.position.y +=
+  //     (
+  //       targetY -
+  //       this.modelGroup.position.y
+  //     ) * 0.12;
+
+
+  //   /*
+  //   =====================================
+  //   UPDATE "CLICK ME" TEXT
+  //   =====================================
+  //   */
+
+  //   if (!this.isCharacterClicked) {
+
+  //     this.updateHeadText();
+
+  //   }
+  // }
+
+
   update() {
 
-    if (!this.modelGroup) return;
+  if (!this.modelGroup) return;
 
 
-    /*
-    =====================================
-    DETECT MOBILE
-    =====================================
-    */
+  /*
+  =====================================
+  DETECT MOBILE
+  =====================================
+  */
 
-    const isMobile =
-      window.matchMedia(
-        "(max-width: 767px)"
-      ).matches;
-
-
-    /*
-    =====================================
-    INPUT SOURCE
-
-    Desktop → Mouse
-
-    Mobile → Phone Tilt
-    =====================================
-    */
-
-    let inputX;
-    let inputY;
+  const isMobile =
+    window.matchMedia(
+      "(max-width: 767px)"
+    ).matches;
 
 
-    if (isMobile) {
+  /*
+  =====================================
+  INPUT
+  Desktop → Mouse
+  Mobile  → Phone Tilt
+  =====================================
+  */
 
-      /*
-      -----------------------------
-      SMOOTH PHONE MOVEMENT
-      -----------------------------
-      */
-
-      const deviceSpeed = 0.08;
-
-
-      this.device.x +=
-        (
-          this.device.targetX -
-          this.device.x
-        ) * deviceSpeed;
+  let inputX = 0;
+  let inputY = 0;
 
 
-      this.device.y +=
-        (
-          this.device.targetY -
-          this.device.y
-        ) * deviceSpeed;
+  /*
+  =====================================
+  SMOOTH INPUT
+  =====================================
+  */
+
+  if (isMobile) {
+
+    const deviceSpeed = 0.08;
+
+    this.device.x +=
+      (
+        this.device.targetX -
+        this.device.x
+      ) * deviceSpeed;
+
+    this.device.y +=
+      (
+        this.device.targetY -
+        this.device.y
+      ) * deviceSpeed;
+
+    inputX = this.device.x;
+    inputY = this.device.y;
+
+  } else {
+
+    const mouseSpeed = 0.35;
+
+    this.mouse.x +=
+      (
+        this.mouse.targetX -
+        this.mouse.x
+      ) * mouseSpeed;
+
+    this.mouse.y +=
+      (
+        this.mouse.targetY -
+        this.mouse.y
+      ) * mouseSpeed;
+
+    inputX = this.mouse.x;
+    inputY = this.mouse.y;
+  }
 
 
-      inputX = this.device.x;
-      inputY = this.device.y;
+  /*
+  =====================================
+  CHARACTER ROTATION
+  =====================================
+  */
 
-    } else {
-
-      /*
-      -----------------------------
-      SMOOTH MOUSE MOVEMENT
-      -----------------------------
-      */
-
-      const mouseSpeed = 0.35;
-
-
-      this.mouse.x +=
-        (
-          this.mouse.targetX -
-          this.mouse.x
-        ) * mouseSpeed;
-
-
-      this.mouse.y +=
-        (
-          this.mouse.targetY -
-          this.mouse.y
-        ) * mouseSpeed;
-
-
-      inputX = this.mouse.x;
-      inputY = this.mouse.y;
-    }
-
-
-    /*
-    =====================================
-    CHARACTER ROTATION
-    =====================================
-    */
+  if (!isMobile || !this.isCharacterClicked) {
 
     const targetRotationY =
       inputX * 0.45;
@@ -1563,13 +1801,11 @@ playVoice() {
     const targetRotationX =
       -inputY * 0.035;
 
-
     this.modelGroup.rotation.y +=
       (
         targetRotationY -
         this.modelGroup.rotation.y
       ) * 0.18;
-
 
     this.modelGroup.rotation.x +=
       (
@@ -1577,34 +1813,80 @@ playVoice() {
         this.modelGroup.rotation.x
       ) * 0.18;
 
+  } else {
 
     /*
-    =====================================
-    CHARACTER POSITION
-    =====================================
+    Mobile after click:
+    keep character straight
     */
 
-    let targetX;
-    let targetY;
+    this.modelGroup.rotation.y +=
+      (0 - this.modelGroup.rotation.y) * 0.08;
+
+    this.modelGroup.rotation.x +=
+      (0 - this.modelGroup.rotation.x) * 0.08;
+  }
 
 
-    if (!this.isCharacterClicked) {
+  /*
+  =====================================
+  CHARACTER POSITION
+  =====================================
+  */
 
-      // Before click
+  let targetX;
+  let targetY;
 
-      targetX =
-        this.characterTargetX +
-        inputX * 0.06;
+
+  if (!this.isCharacterClicked) {
+
+    /*
+    BEFORE CLICK
+    */
+
+    targetX =
+      this.characterTargetX +
+      inputX * 0.06;
+
+    targetY =
+      this.characterBaseY +
+      inputY * 0.015;
+
+  } else {
+
+    /*
+    AFTER CLICK
+    */
+
+    if (isMobile) {
+
+      /*
+      -----------------------------
+      MOBILE
+      -----------------------------
+
+      Character:
+      - stays centered
+      - moves upward
+      - no tilt movement
+      */
+
+      targetX = 0;
 
       targetY =
-        this.characterBaseY +
-        inputY * 0.015;
+        this.characterBaseY + 1.4;
 
     } else {
 
-      // After click:
-      // character stays moved right
-      // but still reacts to mouse/phone
+      /*
+      -----------------------------
+      DESKTOP
+      -----------------------------
+
+      Character:
+      - moves right
+      - STILL follows mouse
+      */
 
       targetX =
         this.characterTargetX +
@@ -1614,38 +1896,40 @@ playVoice() {
         this.characterBaseY +
         inputY * 0.015;
     }
-
-
-    /*
-    =====================================
-    SMOOTH CHARACTER MOVEMENT
-    =====================================
-    */
-
-    this.modelGroup.position.x +=
-      (
-        targetX -
-        this.modelGroup.position.x
-      ) * 0.08;
-
-
-    this.modelGroup.position.y +=
-      (
-        targetY -
-        this.modelGroup.position.y
-      ) * 0.12;
-
-
-    /*
-    =====================================
-    UPDATE "CLICK ME" TEXT
-    =====================================
-    */
-
-    if (!this.isCharacterClicked) {
-
-      this.updateHeadText();
-
-    }
   }
+
+
+  /*
+  =====================================
+  SMOOTH POSITION
+  =====================================
+  */
+
+  this.modelGroup.position.x +=
+    (
+      targetX -
+      this.modelGroup.position.x
+    ) * 0.08;
+
+  this.modelGroup.position.y +=
+    (
+      targetY -
+      this.modelGroup.position.y
+    ) * 0.12;
+
+
+  /*
+  =====================================
+  CLICK ME TEXT
+  =====================================
+  */
+
+  if (!this.isCharacterClicked) {
+
+    this.updateHeadText();
+
+  }
+
+} 
+
 }

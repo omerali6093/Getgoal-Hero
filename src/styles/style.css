@@ -695,7 +695,140 @@ body {
     }
 
 
-    .cth-click-content {
+
+     .cth-click-content {
+        position: absolute;
+
+        left: 5%;
+        right: 5%;
+
+        top: auto;
+        bottom: 5%;
+
+        width: 90%;
+        max-width: none;
+
+        box-sizing: border-box;
+
+        padding: 22px 20px;
+
+        margin: 0;
+
+        border: 1px solid rgba(0, 200, 255, 0.25);
+
+        background: rgba(5, 11, 22, 0.92);
+
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+
+        border-radius: 12px;
+
+        opacity: 0;
+        visibility: hidden;
+
+        transform: translateY(40px);
+
+        transition:
+            opacity 0.5s ease,
+            transform 0.5s ease,
+            visibility 0.5s ease;
+
+        pointer-events: none;
+
+        z-index: 10;
+    }
+
+
+    /* SHOW AFTER CHARACTER CLICK */
+
+    .cth-click-content.active {
+        opacity: 1;
+        visibility: visible;
+
+        transform: translateY(0);
+    }
+
+
+    /* MOBILE HEADING */
+
+    .cth-click-content h1 {
+        margin: 0;
+
+        font-size: 24px;
+        text-align: center;
+
+        line-height: 1.05;
+
+        letter-spacing: 1px;
+
+        font-weight: 500;
+    }
+
+
+    /* BUILT FOR */
+
+    .cth-click-content h1 .thin {
+        font-size: 20px;
+
+        color: rgba(255, 255, 255, 0.55);
+
+        font-weight: 400;
+    }
+
+
+    /* WHAT'S NEXT */
+
+    .cth-click-content h1 .accent {
+        font-size: 20px;
+
+        color: #00c8ff;
+
+        font-weight: 400;
+    }
+
+
+    /* MOBILE SUB-HEADING / DESCRIPTION */
+
+    .cth-click-content p {
+        display: block;
+
+        max-width: 100%;
+
+        margin: 12px 0 0;
+        text-align: center;
+
+        font-size: 14px;
+
+        line-height: 1.5;
+
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+
+    /* HIDE BUTTONS ON MOBILE */
+
+    .cth-click-content .cth-buttons {
+        display: none;
+    }
+
+
+    /* HIDE SERVICE TAGS ON MOBILE */
+
+    .cth-click-content .cth-modules {
+        display: none;
+    }
+
+
+    /* HIDE ORIGINAL HERO CONTENT AFTER CLICK */
+
+    .cth-content {
+        transition:
+            opacity 0.4s ease,
+            transform 0.4s ease;
+    }
+
+
+    /* .cth-click-content {
 
         left: 5%;
 
@@ -725,6 +858,6 @@ body {
         font-size: 10px;
 
         letter-spacing: 2px;
-    }
+    } */
 }
 
