@@ -542,7 +542,7 @@ export default class World {
 
     // Initial character position
     this.characterTargetX = 0;
-    this.characterBaseY = -0.15;
+    this.characterBaseY = -0.65;
 
     // Track click state
     this.isCharacterClicked = false;
@@ -806,7 +806,7 @@ export default class World {
 
         const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
-        const desiredSize = isMobile ? 4 : 6;
+        const desiredSize = isMobile ? 4 : 7;
 
         const scale = desiredSize / maxDimension;
 
@@ -863,11 +863,30 @@ export default class World {
 
         this.modelGroup.add(this.character);
 
-        this.modelGroup.position.set(0, 0, 0);
+        /*
+=====================================
+CHARACTER VERTICAL OFFSET
+=====================================
+*/
+
+        // Move the character slightly downward
+        // inside the modelGroup so the head
+        // has enough space from the top.
+        this.character.position.y -= 0.12;
+
+        this.modelGroup.position.set(
+          0,
+          0,
+          0
+        );
 
         this.scene.add(this.modelGroup);
 
-        console.log("CHARACTER ADDED TO SCENE");
+        // this.modelGroup.position.set(0, 0, 0);
+
+        // this.scene.add(this.modelGroup);
+
+        // console.log("CHARACTER ADDED TO SCENE");
 
 
         // =====================================
