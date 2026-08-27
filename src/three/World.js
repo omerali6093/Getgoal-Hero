@@ -542,7 +542,7 @@ export default class World {
 
     // Initial character position
     this.characterTargetX = 0;
-    this.characterBaseY = -0.65;
+    this.characterBaseY = -0.15;
 
     // Track click state
     this.isCharacterClicked = false;
@@ -806,11 +806,12 @@ export default class World {
 
         const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
-        const desiredSize = isMobile ? 4 : 7;
+        const desiredSize = isMobile ? 4 : 6;
 
         const scale = desiredSize / maxDimension;
 
         this.character.scale.setScalar(scale);
+
 
         /*
         --------------------------------
@@ -1714,178 +1715,134 @@ export default class World {
 
   update() {
 
-  if (!this.modelGroup) return;
+    if (!this.modelGroup) return;
 
-
-  /*
-  =====================================
-  DETECT MOBILE
-  =====================================
-  */
-
-  const isMobile =
-    window.matchMedia(
-      "(max-width: 767px)"
-    ).matches;
-
-
-  /*
-  =====================================
-  INPUT
-  Desktop → Mouse
-  Mobile  → Phone Tilt
-  =====================================
-  */
-
-  let inputX = 0;
-  let inputY = 0;
-
-
-  /*
-  =====================================
-  SMOOTH INPUT
-  =====================================
-  */
-
-  if (isMobile) {
-
-    const deviceSpeed = 0.08;
-
-    this.device.x +=
-      (
-        this.device.targetX -
-        this.device.x
-      ) * deviceSpeed;
-
-    this.device.y +=
-      (
-        this.device.targetY -
-        this.device.y
-      ) * deviceSpeed;
-
-    inputX = this.device.x;
-    inputY = this.device.y;
-
-  } else {
-
-    const mouseSpeed = 0.35;
-
-    this.mouse.x +=
-      (
-        this.mouse.targetX -
-        this.mouse.x
-      ) * mouseSpeed;
-
-    this.mouse.y +=
-      (
-        this.mouse.targetY -
-        this.mouse.y
-      ) * mouseSpeed;
-
-    inputX = this.mouse.x;
-    inputY = this.mouse.y;
-  }
-
-
-  /*
-  =====================================
-  CHARACTER ROTATION
-  =====================================
-  */
-
-  if (!isMobile || !this.isCharacterClicked) {
-
-    const targetRotationY =
-      inputX * 0.45;
-
-    const targetRotationX =
-      -inputY * 0.035;
-
-    this.modelGroup.rotation.y +=
-      (
-        targetRotationY -
-        this.modelGroup.rotation.y
-      ) * 0.18;
-
-    this.modelGroup.rotation.x +=
-      (
-        targetRotationX -
-        this.modelGroup.rotation.x
-      ) * 0.18;
-
-  } else {
 
     /*
-    Mobile after click:
-    keep character straight
+    =====================================
+    DETECT MOBILE
+    =====================================
     */
 
-    this.modelGroup.rotation.y +=
-      (0 - this.modelGroup.rotation.y) * 0.08;
+    const isMobile =
+      window.matchMedia(
+        "(max-width: 767px)"
+      ).matches;
 
-    this.modelGroup.rotation.x +=
-      (0 - this.modelGroup.rotation.x) * 0.08;
-  }
-
-
-  /*
-  =====================================
-  CHARACTER POSITION
-  =====================================
-  */
-
-  let targetX;
-  let targetY;
-
-
-  if (!this.isCharacterClicked) {
 
     /*
-    BEFORE CLICK
+    =====================================
+    INPUT
+    Desktop → Mouse
+    Mobile  → Phone Tilt
+    =====================================
     */
 
-    targetX =
-      this.characterTargetX +
-      inputX * 0.06;
+    let inputX = 0;
+    let inputY = 0;
 
-    targetY =
-      this.characterBaseY +
-      inputY * 0.015;
-
-  } else {
 
     /*
-    AFTER CLICK
+    =====================================
+    SMOOTH INPUT
+    =====================================
     */
 
     if (isMobile) {
 
-      /*
-      -----------------------------
-      MOBILE
-      -----------------------------
+      const deviceSpeed = 0.08;
 
-      Character:
-      - stays centered
-      - moves upward
-      - no tilt movement
-      */
+      this.device.x +=
+        (
+          this.device.targetX -
+          this.device.x
+        ) * deviceSpeed;
 
-      targetX = 0;
+      this.device.y +=
+        (
+          this.device.targetY -
+          this.device.y
+        ) * deviceSpeed;
 
-      targetY =
-        this.characterBaseY + 1.4;
+      inputX = this.device.x;
+      inputY = this.device.y;
+
+    } else {
+
+      const mouseSpeed = 0.35;
+
+      this.mouse.x +=
+        (
+          this.mouse.targetX -
+          this.mouse.x
+        ) * mouseSpeed;
+
+      this.mouse.y +=
+        (
+          this.mouse.targetY -
+          this.mouse.y
+        ) * mouseSpeed;
+
+      inputX = this.mouse.x;
+      inputY = this.mouse.y;
+    }
+
+
+    /*
+    =====================================
+    CHARACTER ROTATION
+    =====================================
+    */
+
+    if (!isMobile || !this.isCharacterClicked) {
+
+      const targetRotationY =
+        inputX * 0.45;
+
+      const targetRotationX =
+        -inputY * 0.035;
+
+      this.modelGroup.rotation.y +=
+        (
+          targetRotationY -
+          this.modelGroup.rotation.y
+        ) * 0.18;
+
+      this.modelGroup.rotation.x +=
+        (
+          targetRotationX -
+          this.modelGroup.rotation.x
+        ) * 0.18;
 
     } else {
 
       /*
-      -----------------------------
-      DESKTOP
-      -----------------------------
+      Mobile after click:
+      keep character straight
+      */
 
-      Character:
-      - moves right
-      - STILL follows mouse
+      this.modelGroup.rotation.y +=
+        (0 - this.modelGroup.rotation.y) * 0.08;
+
+      this.modelGroup.rotation.x +=
+        (0 - this.modelGroup.rotation.x) * 0.08;
+    }
+
+
+    /*
+    =====================================
+    CHARACTER POSITION
+    =====================================
+    */
+
+    let targetX;
+    let targetY;
+
+
+    if (!this.isCharacterClicked) {
+
+      /*
+      BEFORE CLICK
       */
 
       targetX =
@@ -1895,41 +1852,85 @@ export default class World {
       targetY =
         this.characterBaseY +
         inputY * 0.015;
+
+    } else {
+
+      /*
+      AFTER CLICK
+      */
+
+      if (isMobile) {
+
+        /*
+        -----------------------------
+        MOBILE
+        -----------------------------
+  
+        Character:
+        - stays centered
+        - moves upward
+        - no tilt movement
+        */
+
+        targetX = 0;
+
+        targetY =
+          this.characterBaseY + 1.4;
+
+      } else {
+
+        /*
+        -----------------------------
+        DESKTOP
+        -----------------------------
+  
+        Character:
+        - moves right
+        - STILL follows mouse
+        */
+
+        targetX =
+          this.characterTargetX +
+          inputX * 0.06;
+
+        targetY =
+          this.characterBaseY +
+          inputY * 0.015;
+      }
     }
+
+
+    /*
+    =====================================
+    SMOOTH POSITION
+    =====================================
+    */
+
+    this.modelGroup.position.x +=
+      (
+        targetX -
+        this.modelGroup.position.x
+      ) * 0.08;
+
+    this.modelGroup.position.y +=
+      (
+        targetY -
+        this.modelGroup.position.y
+      ) * 0.12;
+
+
+    /*
+    =====================================
+    CLICK ME TEXT
+    =====================================
+    */
+
+    if (!this.isCharacterClicked) {
+
+      this.updateHeadText();
+
+    }
+
   }
-
-
-  /*
-  =====================================
-  SMOOTH POSITION
-  =====================================
-  */
-
-  this.modelGroup.position.x +=
-    (
-      targetX -
-      this.modelGroup.position.x
-    ) * 0.08;
-
-  this.modelGroup.position.y +=
-    (
-      targetY -
-      this.modelGroup.position.y
-    ) * 0.12;
-
-
-  /*
-  =====================================
-  CLICK ME TEXT
-  =====================================
-  */
-
-  if (!this.isCharacterClicked) {
-
-    this.updateHeadText();
-
-  }
-
-} 
 
 }
