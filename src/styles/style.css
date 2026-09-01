@@ -9,12 +9,6 @@ body {
    GLOBAL HERO
 ========================================================= */
 
-.header {
-    border: 1px solid red;
-    width: 100%;
-    height: 100px;
-    background-color: #00c8ff;
-}
 
 .cth-hero {
     position: relative;

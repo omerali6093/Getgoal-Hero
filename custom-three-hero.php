@@ -114,9 +114,6 @@ function cth_hero_shortcode() {
 
     ?>
 
-    <Header class="header">
-
-    </Header>
 
     <section
         id="custom-three-hero"
