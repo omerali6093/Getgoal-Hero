@@ -115,10 +115,7 @@ function cth_hero_shortcode() {
     ?>
 
 
-    <section
-        id="custom-three-hero"
-        class="cth-hero"
-    >
+    <section id="custom-three-hero" class="cth-hero" >
 
 
         <!-- =====================================================
@@ -250,6 +247,8 @@ function cth_hero_shortcode() {
                 </div>
 
             </div>
+
+            
 
         </div>
 
@@ -386,6 +385,18 @@ function cth_hero_shortcode() {
             </span>
 
         </div>
+
+        <!-- SOUND CONTROL -->
+
+<button
+    type="button"
+    class="cth-sound-toggle"
+    aria-label="Turn sound off"
+    aria-pressed="false"
+>
+    <span class="cth-sound-icon">🔊</span>
+    <span class="cth-sound-label">Sound On</span>
+</button>
 
 
     </section>
