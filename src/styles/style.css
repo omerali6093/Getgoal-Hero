@@ -622,7 +622,7 @@ body {
 
     z-index: 20;
 
-    margin-top: -2.5em;
+    margin-top: 0;
 
     color: #00c8ff;
 
@@ -631,6 +631,7 @@ body {
     font-weight: 900;
 
     letter-spacing: 3px;
+    padding-left: 3px;
 
     white-space: nowrap;
 
@@ -685,10 +686,21 @@ body {
 
 @media (max-width: 767px) {
 
+    /* Eliminate unwanted top spacing / gap below theme header */
+    :is(.entry-content, .site-main, .ct-container, article, .elementor-section-wrap, .elementor-widget-container) > .cth-hero:first-child,
+    :is(.entry-content, .site-main, .ct-container, article, .elementor-section-wrap, .elementor-widget-container) > *:first-child .cth-hero,
     .cth-hero {
-        min-height: 80svh;
+        min-height: 88svh;
 
-        align-items: flex-start;
+        align-items: center;
+
+        margin-top: calc(-1 * var(--content-vertical-spacing, 0px));
+        padding-top: 0;
+    }
+
+    /* Reset desktop margin-top so canvas stays flush at the top of hero */
+    .cth-canvas {
+        margin-top: 0;
     }
 
       .cth-sound-toggle {
@@ -721,7 +733,7 @@ body {
 
         margin-left: 5%;
 
-        margin-top: 100px;
+        margin-top: 20px;
 
         width: 90%;
     }

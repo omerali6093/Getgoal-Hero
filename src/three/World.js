@@ -522,7 +522,7 @@ export default class World {
         const isMobile = this.isMobileDevice();
         const isTablet = this.isTabletDevice();
 
-        const desiredSize = isMobile ? 4 : isTablet ? 5.5 : 7;
+        const desiredSize = isMobile ? 5.0 : isTablet ? 5.8 : 7;
 
         const scale =
           desiredSize /
@@ -1158,7 +1158,7 @@ export default class World {
         new THREE.Vector3(
           center.x,
           box.max.y -
-            size.y * 0.26,
+            size.y * 0.23,
           box.max.z + 0.05
         );
 
@@ -1196,13 +1196,30 @@ export default class World {
     const hero =
       this.experience.hero;
 
+    const canvas =
+      this.experience.canvas;
+
+    const canvasTop =
+      canvas ? canvas.offsetTop : 0;
+
+    const canvasLeft =
+      canvas ? canvas.offsetLeft : 0;
+
+    const width =
+      canvas ? canvas.clientWidth : hero.clientWidth;
+
+    const height =
+      canvas ? canvas.clientHeight : hero.clientHeight;
+
     const x =
       (headPosition.x * 0.5 + 0.5) *
-      hero.clientWidth;
+      width +
+      canvasLeft;
 
     const y =
       (-headPosition.y * 0.5 + 0.5) *
-      hero.clientHeight;
+      height +
+      canvasTop;
 
     // =====================================
     // UPDATE TEXT POSITION
@@ -1362,12 +1379,12 @@ export default class World {
       } else {
         // After click: text generated, character moves with tilt on mobile & tablet
         if (isMobile) {
-          // Mobile: shifted upward to stay clearly above text card
+          // Mobile: shifted upward above text card without cutting off at top
           targetX = inputX * 0.35;
           targetY =
             this.characterBaseY +
-            1.4 +
-            inputY * 0.18;
+            0.85 +
+            inputY * 0.12;
         } else {
           // Tablet: adjust base depending on orientation, reacts to tilt
           const isLandscape =
