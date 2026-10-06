@@ -62,19 +62,53 @@ export default class Experience {
     });
 
     // Click event
-    // this.hero.addEventListener("click", (event) => {
-
-    //   // Start speech directly from the user's click
-    //   this.world.speakClickContent();
-
-    //   // Then run the normal character click logic
-    //   this.world.handleClick(event);
-
-    // });
-
     this.hero.addEventListener("click", (event) => {
-    this.world.handleClick(event);
-});
+      this.world.handleClick(event);
+    });
+
+    // Touch tap detection for Mobile & Tablet
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    this.hero.addEventListener(
+      "touchstart",
+      (event) => {
+        if (event.touches.length === 1) {
+          touchStartX = event.touches[0].clientX;
+          touchStartY = event.touches[0].clientY;
+          touchStartTime = Date.now();
+        }
+      },
+      { passive: true }
+    );
+
+    this.hero.addEventListener(
+      "touchend",
+      (event) => {
+        // Do not trigger character click if touching the sound toggle button
+        const target = event.target;
+        if (target && target.closest && target.closest(".cth-sound-toggle")) {
+          return;
+        }
+
+        if (event.changedTouches.length === 1) {
+          const deltaX = Math.abs(
+            event.changedTouches[0].clientX - touchStartX
+          );
+          const deltaY = Math.abs(
+            event.changedTouches[0].clientY - touchStartY
+          );
+          const duration = Date.now() - touchStartTime;
+
+          // Quick tap with minimal displacement (< 15px, < 350ms)
+          if (deltaX < 15 && deltaY < 15 && duration < 350) {
+            this.world.handleClick(event);
+          }
+        }
+      },
+      { passive: true }
+    );
 
     // Resize
     window.addEventListener("resize", () => {

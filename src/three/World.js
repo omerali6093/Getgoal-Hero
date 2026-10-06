@@ -39,6 +39,9 @@ export default class World {
       targetY: 0,
     };
 
+    this.orientationActive = false;
+    this.orientationPermissionRequested = false;
+
     // =====================================
     // INITIAL CHARACTER POSITION
     // =====================================
@@ -73,6 +76,30 @@ export default class World {
   }
 
   // =====================================
+  // DEVICE DETECTION
+  // =====================================
+
+  isMobileDevice() {
+    return window.matchMedia("(max-width: 767px)").matches;
+  }
+
+  isTabletDevice() {
+    if (this.isMobileDevice()) return false;
+    const isTabletWidth = window.matchMedia("(max-width: 1024px)").matches;
+    const hasTouch =
+      (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0) ||
+      "ontouchstart" in window;
+    return (
+      isTabletWidth ||
+      (hasTouch && window.matchMedia("(max-width: 1366px)").matches)
+    );
+  }
+
+  isMobileOrTablet() {
+    return this.isMobileDevice() || this.isTabletDevice();
+  }
+
+  // =====================================
   // MOUSE
   // =====================================
 
@@ -98,39 +125,29 @@ export default class World {
       this.mouse.targetY = 0;
     });
 
-    // ========================================
-    // MOBILE DEVICE ROTATION
-    // ========================================
+    // Touch fallback for mobile and tablet if orientation sensor is unavailable
+    hero.addEventListener(
+      "touchmove",
+      (event) => {
+        if (event.touches.length > 0 && !this.orientationActive) {
+          const touch = event.touches[0];
+          const rect = hero.getBoundingClientRect();
 
-    if (window.DeviceOrientationEvent) {
-      const handleOrientation = (event) => {
-        let gamma = event.gamma || 0;
-        let beta = event.beta || 0;
+          this.device.targetX = THREE.MathUtils.clamp(
+            ((touch.clientX - rect.left) / rect.width) * 2 - 1,
+            -1,
+            1
+          );
 
-        // Limit phone movement
-        gamma = THREE.MathUtils.clamp(
-          gamma,
-          -30,
-          30
-        );
-
-        beta = THREE.MathUtils.clamp(
-          beta,
-          -30,
-          30
-        );
-
-        // Convert phone rotation to -1 to 1
-        this.mouse.targetX = gamma / 30;
-        this.mouse.targetY = -beta / 30;
-      };
-
-      window.addEventListener(
-        "deviceorientation",
-        handleOrientation,
-        true
-      );
-    }
+          this.device.targetY = THREE.MathUtils.clamp(
+            -((touch.clientY - rect.top) / rect.height) * 2 + 1,
+            -1,
+            1
+          );
+        }
+      },
+      { passive: true }
+    );
   }
 
   // =====================================
@@ -149,52 +166,21 @@ export default class World {
 
     if (!soundButton) return;
 
-    soundButton.addEventListener("click", (event) => {
-      // Prevent the sound button from triggering
-      // the character click event.
-      event.stopPropagation();
+    const toggleSound = (event) => {
+      if (event) {
+        event.stopPropagation();
+      }
 
       this.isSoundEnabled =
         !this.isSoundEnabled;
 
-      const icon =
-        soundButton.querySelector(
-          ".cth-sound-icon"
-        );
-
-      const label =
-        soundButton.querySelector(
-          ".cth-sound-label"
-        );
+      this.updateSoundButtonUI(soundButton);
 
       // =====================================
       // SOUND OFF
       // =====================================
 
       if (!this.isSoundEnabled) {
-        soundButton.classList.add(
-          "is-muted"
-        );
-
-        soundButton.setAttribute(
-          "aria-pressed",
-          "true"
-        );
-
-        soundButton.setAttribute(
-          "aria-label",
-          "Turn sound on"
-        );
-
-        if (icon) {
-          icon.textContent = "🔇";
-        }
-
-        if (label) {
-          label.textContent = "Sound Off";
-        }
-
-        // Mute currently playing custom voice
         if (this.currentAudio) {
           this.currentAudio.muted = true;
         }
@@ -209,38 +195,90 @@ export default class World {
       // =====================================
 
       else {
-        soundButton.classList.remove(
-          "is-muted"
-        );
-
-        soundButton.setAttribute(
-          "aria-pressed",
-          "false"
-        );
-
-        soundButton.setAttribute(
-          "aria-label",
-          "Turn sound off"
-        );
-
-        if (icon) {
-          icon.textContent = "🔊";
-        }
-
-        if (label) {
-          label.textContent = "Sound On";
-        }
-
-        // Unmute currently playing custom voice
         if (this.currentAudio) {
           this.currentAudio.muted = false;
         }
 
         if (this.voiceAudio) {
           this.voiceAudio.muted = false;
+
+          // Resume playback if character was clicked and audio is paused
+          if (
+            this.isCharacterClicked &&
+            this.voiceAudio.paused &&
+            !this.voiceAudio.ended
+          ) {
+            this.voiceAudio.play().catch((err) => {
+              console.warn("Audio resume error:", err);
+            });
+          }
         }
       }
+    };
+
+    soundButton.addEventListener("click", (event) => {
+      toggleSound(event);
     });
+
+    // Mobile & tablet touch interaction support
+    soundButton.addEventListener(
+      "touchstart",
+      (event) => {
+        event.stopPropagation();
+      },
+      { passive: true }
+    );
+
+    soundButton.addEventListener(
+      "touchend",
+      (event) => {
+        event.stopPropagation();
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+        toggleSound(event);
+      },
+      { passive: false }
+    );
+  }
+
+  updateSoundButtonUI(button) {
+    const soundButton =
+      button || document.querySelector(".cth-sound-toggle");
+
+    if (!soundButton) return;
+
+    const icon =
+      soundButton.querySelector(".cth-sound-icon");
+
+    const label =
+      soundButton.querySelector(".cth-sound-label");
+
+    if (!this.isSoundEnabled) {
+      soundButton.classList.add("is-muted");
+      soundButton.setAttribute("aria-pressed", "true");
+      soundButton.setAttribute("aria-label", "Turn sound on");
+
+      if (icon) {
+        icon.textContent = "🔇";
+      }
+
+      if (label) {
+        label.textContent = "Sound Off";
+      }
+    } else {
+      soundButton.classList.remove("is-muted");
+      soundButton.setAttribute("aria-pressed", "false");
+      soundButton.setAttribute("aria-label", "Turn sound off");
+
+      if (icon) {
+        icon.textContent = "🔊";
+      }
+
+      if (label) {
+        label.textContent = "Sound On";
+      }
+    }
   }
 
   // =====================================
@@ -249,52 +287,49 @@ export default class World {
 
   setupDeviceOrientation() {
     // Only run on mobile/tablet devices
-    if (
-      !window.matchMedia(
-        "(max-width: 767px)"
-      ).matches
-    ) {
+    if (!this.isMobileOrTablet()) {
       return;
     }
 
     const enableOrientation = () => {
+      if (this.orientationActive) return;
+      this.orientationActive = true;
+
       window.addEventListener(
         "deviceorientation",
         (event) => {
-          /*
-          gamma:
-          Phone tilted LEFT / RIGHT
+          let gamma = event.gamma || 0; // Left / Right [-90, 90]
+          let beta = event.beta || 0;   // Forward / Backward [-180, 180]
 
-          beta:
-          Phone tilted FORWARD / BACKWARD
-          */
+          const angle =
+            typeof window.orientation !== "undefined"
+              ? window.orientation
+              : screen.orientation?.angle || 0;
 
-          // LEFT / RIGHT
-          const gamma = event.gamma || 0;
+          let normalizedX = 0;
+          let normalizedY = 0;
 
-          // TOP / BOTTOM
-          const beta = event.beta || 0;
-
-          /*
-          Normalize values.
-
-          gamma normally:
-          -90 to +90
-
-          beta normally:
-          -180 to +180
-          */
+          if (Math.abs(angle) === 90 || Math.abs(angle) === 270) {
+            // Landscape mode
+            const sign = angle > 0 ? 1 : -1;
+            normalizedX = (beta * sign) / 25;
+            normalizedY = (-gamma * sign) / 25;
+          } else {
+            // Portrait mode (typical resting angle ~45 deg)
+            normalizedX = gamma / 25;
+            normalizedY = (beta - 45) / 25;
+          }
 
           this.device.targetX =
             THREE.MathUtils.clamp(
-              gamma / 35,
+              normalizedX,
               -1,
               1
             );
 
           this.device.targetY =
             THREE.MathUtils.clamp(
-              (beta - 45) / 35,
+              normalizedY,
               -1,
               1
             );
@@ -302,6 +337,8 @@ export default class World {
         true
       );
     };
+
+    this.enableOrientation = enableOrientation;
 
     // =====================================
     // IPHONE / IPAD PERMISSION
@@ -313,10 +350,16 @@ export default class World {
       typeof DeviceOrientationEvent.requestPermission ===
         "function"
     ) {
-      // Permission must be requested
-      // after a user interaction
+      this.requestOrientationPermission = () => {
+        if (
+          this.orientationActive ||
+          this.orientationPermissionRequested
+        ) {
+          return;
+        }
 
-      const requestPermission = () => {
+        this.orientationPermissionRequested = true;
+
         DeviceOrientationEvent
           .requestPermission()
           .then((response) => {
@@ -325,22 +368,49 @@ export default class World {
             }
           })
           .catch((error) => {
-            console.error(
+            console.warn(
               "Device orientation permission error:",
               error
             );
           });
+      };
 
-        // Run only once
-        document.removeEventListener(
+      const handleUserGesture = () => {
+        if (this.requestOrientationPermission) {
+          this.requestOrientationPermission();
+        }
+
+        window.removeEventListener(
+          "touchstart",
+          handleUserGesture
+        );
+
+        window.removeEventListener(
+          "touchend",
+          handleUserGesture
+        );
+
+        window.removeEventListener(
           "click",
-          requestPermission
+          handleUserGesture
         );
       };
 
-      document.addEventListener(
+      window.addEventListener(
+        "touchstart",
+        handleUserGesture,
+        { passive: true }
+      );
+
+      window.addEventListener(
+        "touchend",
+        handleUserGesture,
+        { passive: true }
+      );
+
+      window.addEventListener(
         "click",
-        requestPermission
+        handleUserGesture
       );
     } else {
       // Android and other supported devices
@@ -449,13 +519,10 @@ export default class World {
             size.z
           );
 
-        const isMobile =
-          window.matchMedia(
-            "(max-width: 767px)"
-          ).matches;
+        const isMobile = this.isMobileDevice();
+        const isTablet = this.isTabletDevice();
 
-        const desiredSize =
-          isMobile ? 4 : 7;
+        const desiredSize = isMobile ? 4 : isTablet ? 5.5 : 7;
 
         const scale =
           desiredSize /
@@ -597,7 +664,7 @@ export default class World {
       !window.CTH_DATA ||
       !window.CTH_DATA.voiceUrl
     ) {
-      console.error(
+      console.warn(
         "Voice URL not found"
       );
 
@@ -643,25 +710,36 @@ export default class World {
 
     this.voiceAudio.volume = 1;
 
+    this.voiceAudio.addEventListener("play", () => {
+      console.log("🔊 CUSTOM VOICE PLAYING");
+      this.updateSoundButtonUI();
+    });
+
+    this.voiceAudio.addEventListener("ended", () => {
+      console.log("🔊 CUSTOM VOICE FINISHED");
+    });
+
     /*
     --------------------------------
     PLAY
     --------------------------------
     */
 
-    this.voiceAudio
-      .play()
-      .then(() => {
-        console.log(
-          "🔊 CUSTOM VOICE PLAYING"
-        );
-      })
-      .catch((error) => {
-        console.error(
-          "🔊 CUSTOM VOICE ERROR:",
-          error
-        );
-      });
+    if (this.isSoundEnabled) {
+      this.voiceAudio
+        .play()
+        .then(() => {
+          console.log(
+            "🔊 CUSTOM VOICE PLAYING"
+          );
+        })
+        .catch((error) => {
+          console.warn(
+            "🔊 CUSTOM VOICE ERROR:",
+            error
+          );
+        });
+    }
   }
 
   // =====================================
@@ -803,26 +881,10 @@ export default class World {
     // ========================================
 
     if (
-      typeof DeviceOrientationEvent !==
-        "undefined" &&
-      typeof DeviceOrientationEvent.requestPermission ===
-        "function"
+      this.requestOrientationPermission &&
+      !this.orientationActive
     ) {
-      DeviceOrientationEvent
-        .requestPermission()
-        .then((permission) => {
-          if (permission === "granted") {
-            console.log(
-              "📱 DEVICE MOTION ENABLED"
-            );
-          }
-        })
-        .catch((error) => {
-          console.error(
-            "📱 DEVICE MOTION PERMISSION ERROR:",
-            error
-          );
-        });
+      this.requestOrientationPermission();
     }
 
     const hero =
@@ -868,6 +930,13 @@ export default class World {
     */
 
     this.isCharacterClicked = true;
+    hero.classList.add("is-clicked");
+
+    const soundButton =
+      hero.querySelector(".cth-sound-toggle");
+    if (soundButton) {
+      soundButton.classList.add("is-content-active");
+    }
 
     console.log(
       "CHARACTER CLICKED"
@@ -909,7 +978,7 @@ export default class World {
 
     /*
     --------------------------------
-    MOVE CHARACTER RIGHT
+    MOVE CHARACTER RIGHT (DESKTOP)
     --------------------------------
     */
 
@@ -1155,21 +1224,19 @@ export default class World {
 
     /*
     =====================================
-    DETECT MOBILE
+    DETECT DEVICE TYPE
     =====================================
     */
 
-    const isMobile =
-      window.matchMedia(
-        "(max-width: 767px)"
-      ).matches;
+    const isMobile = this.isMobileDevice();
+    const isTablet = this.isTabletDevice();
+    const isMobileOrTablet = isMobile || isTablet;
 
     /*
     =====================================
     INPUT
-
-    Desktop → Mouse
-    Mobile  → Phone Tilt
+    Desktop         → Mouse
+    Mobile & Tablet → Device Tilt
     =====================================
     */
 
@@ -1182,24 +1249,8 @@ export default class World {
     =====================================
     */
 
-    if (isMobile) {
-      const deviceSpeed = 0.08;
-
-      this.device.x +=
-        (
-          this.device.targetX -
-          this.device.x
-        ) * deviceSpeed;
-
-      this.device.y +=
-        (
-          this.device.targetY -
-          this.device.y
-        ) * deviceSpeed;
-
-      inputX = this.device.x;
-      inputY = this.device.y;
-    } else {
+    if (!isMobileOrTablet) {
+      // Desktop: preserve exact original desktop smoothing logic
       const mouseSpeed = 0.35;
 
       this.mouse.x +=
@@ -1216,6 +1267,24 @@ export default class World {
 
       inputX = this.mouse.x;
       inputY = this.mouse.y;
+    } else {
+      // Mobile & Tablet: smooth gyro tilt input
+      const deviceSpeed = 0.12;
+
+      this.device.x +=
+        (
+          this.device.targetX -
+          this.device.x
+        ) * deviceSpeed;
+
+      this.device.y +=
+        (
+          this.device.targetY -
+          this.device.y
+        ) * deviceSpeed;
+
+      inputX = this.device.x;
+      inputY = this.device.y;
     }
 
     /*
@@ -1224,10 +1293,8 @@ export default class World {
     =====================================
     */
 
-    if (
-      !isMobile ||
-      !this.isCharacterClicked
-    ) {
+    if (!isMobileOrTablet) {
+      // Desktop: preserve exact original rotation logic
       const targetRotationY =
         inputX * 0.45;
 
@@ -1246,18 +1313,24 @@ export default class World {
           this.modelGroup.rotation.x
         ) * 0.18;
     } else {
-      /*
-      Mobile after click:
-      keep character straight
-      */
+      // Mobile & Tablet: rotates with tilt BOTH before AND after click!
+      const targetRotationY =
+        inputX * 0.45;
+
+      const targetRotationX =
+        -inputY * 0.12;
 
       this.modelGroup.rotation.y +=
-        (0 - this.modelGroup.rotation.y) *
-        0.08;
+        (
+          targetRotationY -
+          this.modelGroup.rotation.y
+        ) * 0.18;
 
       this.modelGroup.rotation.x +=
-        (0 - this.modelGroup.rotation.x) *
-        0.08;
+        (
+          targetRotationX -
+          this.modelGroup.rotation.x
+        ) * 0.18;
     }
 
     /*
@@ -1269,11 +1342,8 @@ export default class World {
     let targetX;
     let targetY;
 
-    if (!this.isCharacterClicked) {
-      /*
-      BEFORE CLICK
-      */
-
+    if (!isMobileOrTablet) {
+      // Desktop: preserve exact original position logic
       targetX =
         this.characterTargetX +
         inputX * 0.06;
@@ -1282,44 +1352,34 @@ export default class World {
         this.characterBaseY +
         inputY * 0.015;
     } else {
-      /*
-      AFTER CLICK
-      */
-
-      if (isMobile) {
-        /*
-        -----------------------------
-        MOBILE
-        -----------------------------
-
-        Character:
-        - stays centered
-        - moves upward
-        - no tilt movement
-        */
-
-        targetX = 0;
-
-        targetY =
-          this.characterBaseY + 1.4;
-      } else {
-        /*
-        -----------------------------
-        DESKTOP
-        -----------------------------
-
-        Character:
-        - moves right
-        - STILL follows mouse
-        */
-
-        targetX =
-          this.characterTargetX +
-          inputX * 0.06;
-
+      // Mobile & Tablet: moves on tilt BOTH before AND after click!
+      if (!this.isCharacterClicked) {
+        // Before click: centered base, reacts dynamically to tilt
+        targetX = inputX * 0.35;
         targetY =
           this.characterBaseY +
-          inputY * 0.015;
+          inputY * 0.18;
+      } else {
+        // After click: text generated, character moves with tilt on mobile & tablet
+        if (isMobile) {
+          // Mobile: shifted upward to stay clearly above text card
+          targetX = inputX * 0.35;
+          targetY =
+            this.characterBaseY +
+            1.4 +
+            inputY * 0.18;
+        } else {
+          // Tablet: adjust base depending on orientation, reacts to tilt
+          const isLandscape =
+            window.innerWidth > window.innerHeight;
+          const tabletBaseX = isLandscape ? 1.5 : 0;
+          const tabletBaseY = isLandscape
+            ? this.characterBaseY
+            : this.characterBaseY + 1.1;
+
+          targetX = tabletBaseX + inputX * 0.35;
+          targetY = tabletBaseY + inputY * 0.18;
+        }
       }
     }
 

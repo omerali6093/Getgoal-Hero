@@ -698,6 +698,18 @@ body {
         padding: 9px 12px;
 
         font-size: 11px;
+        z-index: 35;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
+    /* Move sound button to top right when click content is active to prevent overlapping with text */
+    .cth-hero.is-clicked .cth-sound-toggle,
+    .cth-sound-toggle.is-content-active {
+        bottom: auto;
+        top: 20px;
+        right: 18px;
     }
 
     .cth-sound-icon {
@@ -949,4 +961,42 @@ body {
         letter-spacing: 2px;
     } */
 }
+ 
+ 
+/* =========================================================
+   TABLET
+========================================================= */
 
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    .cth-hero {
+        align-items: center;
+    }
+
+    .cth-sound-toggle {
+        right: 25px;
+        bottom: 25px;
+        z-index: 35;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
+    .cth-hero.is-clicked .cth-sound-toggle,
+    .cth-sound-toggle.is-content-active {
+        bottom: auto;
+        top: 25px;
+        right: 25px;
+    }
+
+    .cth-content {
+        margin-left: 6%;
+        width: 75%;
+    }
+
+    .cth-click-content {
+        left: 6%;
+        bottom: 12%;
+        max-width: 520px;
+    }
+}
